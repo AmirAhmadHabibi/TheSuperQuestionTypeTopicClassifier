@@ -1,5 +1,10 @@
+# encoding: utf-8
 import pandas as pd
 import numpy as np
+import sys
+
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 
 def read_files():
@@ -39,8 +44,73 @@ def eval_types():
     print 'suggested types for 18 : ' + str(data18[~ data18['suggested_type'].isnull()].shape[0])
 
 
+def eval_questions():
+    # creating a result DataFrame and initiate its columns with nan and 0 values
+    result = data16.copy()
+    result.loc[:, ('subject1', 'subject2', 'subject3', 'suggested_subject',
+                   'type1', 'type2', 'type3', 'suggested_type')] = np.nan
+    result.loc[:, ('subject_notsure', 'type_notsure')] = 0
+
+    first_score = 5
+    second_score = 4
+    third_score = 3
+
+    for row_id, result_row in result.iterrows():
+        d16 = data16.loc[row_id]
+        d17 = data17.loc[row_id]
+        d18 = data18.loc[row_id]
+        scores = dict()
+
+        if d16['subject1'] is not np.nan:
+            scores[d16['subject1']] = first_score
+        if d16['subject2'] is not np.nan:
+            scores[d16['subject2']] = second_score
+        if d16['subject3'] is not np.nan:
+            scores[d16['subject3']] = third_score
+
+        if d17['subject1'] is not np.nan:
+            if d17['subject1'] in scores:
+                scores[d17['subject1']] += first_score
+            else:
+                scores[d17['subject1']] = first_score
+        if d17['subject2'] is not np.nan:
+            if d17['subject2'] in scores:
+                scores[d17['subject2']] += second_score
+            else:
+                scores[d17['subject2']] = second_score
+        if d17['subject3'] is not np.nan:
+            if d17['subject3'] in scores:
+                scores[d17['subject3']] += third_score
+            else:
+                scores[d17['subject3']] = third_score
+
+        if d18['subject1'] is not np.nan:
+            if d18['subject1'] in scores:
+                scores[d18['subject1']] += first_score
+            else:
+                scores[d18['subject1']] = first_score
+        if d18['subject2'] is not np.nan:
+            if d18['subject2'] in scores:
+                scores[d18['subject2']] += second_score
+            else:
+                scores[d18['subject2']] = second_score
+        if d18['subject3'] is not np.nan:
+            if d18['subject3'] in scores:
+                scores[d18['subject3']] += third_score
+            else:
+                scores[d18['subject3']] = third_score
+
+        sorted_subjects = sorted(scores, key=scores.get)
+        try:
+            result_row['subject1'] = [sorted_subjects[0], scores[sorted_subjects[0]]]
+            result_row['subject2'] = [sorted_subjects[1], scores[sorted_subjects[1]]]
+            result_row['subject3'] = [sorted_subjects[2], scores[sorted_subjects[2]]]
+        except Exception, e:
+            # print e
+            continue
+
+
 read_files()
 # eval_subjects()
 # eval_types()
-
-
+eval_questions()
