@@ -100,14 +100,16 @@ def eval_questions():
             else:
                 scores[d18['subject3']] = third_score
 
-        sorted_subjects = sorted(scores, key=scores.get)
+        sorted_subjects = sorted(scores, key=scores.get, reverse=True)
         try:
             result_row['subject1'] = [sorted_subjects[0], scores[sorted_subjects[0]]]
             result_row['subject2'] = [sorted_subjects[1], scores[sorted_subjects[1]]]
             result_row['subject3'] = [sorted_subjects[2], scores[sorted_subjects[2]]]
-        except Exception, e:
-            # print e
-            continue
+        except:
+            pass
+        result.loc[row_id] = result_row
+
+    print result[:15]
 
 
 read_files()
