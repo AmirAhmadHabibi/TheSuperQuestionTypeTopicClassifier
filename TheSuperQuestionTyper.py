@@ -53,6 +53,7 @@ def eval_questions():
     third_score = 3
 
     for row_id, result_row in result.iterrows():  # for each question
+        # if row_id<2770: continue
         if row_id % 50 == 0: print row_id
         d16 = data16.loc[row_id]
         d17 = data17.loc[row_id]
@@ -80,16 +81,14 @@ def eval_questions():
             if str(e) != "list index out of range":
                 print e
             pass
-        # print scores
         result.loc[row_id] = result_row
 
     result.to_csv("result.csv", sep=';')
     print result[:]
 
 
-# TODO: nan values should'nt be saved
 def add_value(name, score_value, scores):
-    if name is not np.nan:
+    if name is not np.nan and str(name) != 'nan':
         if name in scores:
             scores[name] += score_value
         else:
