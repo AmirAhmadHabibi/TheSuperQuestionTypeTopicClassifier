@@ -54,11 +54,11 @@ def eval_questions():
 
     for row_id, result_row in result.iterrows():  # for each question
         # if row_id<2770: continue
-        # if row_id % 50 == 0: print row_id
+        if row_id % 50 == 0: print row_id
         d16 = data16.loc[row_id]
         d17 = data17.loc[row_id]
         d18 = data18.loc[row_id]
-        scores = dict()
+        scores = []
 
         scores = add_value(d16['subject1'], first_score, scores)
         scores = add_value(d16['subject2'], second_score, scores)
@@ -72,11 +72,11 @@ def eval_questions():
         scores = add_value(d18['subject2'], second_score, scores)
         scores = add_value(d18['subject3'], third_score, scores)
 
-        sorted_scores = sorted(scores, key=scores.get, reverse=True)
+        sorted_scores = sorted(scores, key=lambda x: x[1], reverse=True)
         try:
-            result_row['subject1'] = [sorted_scores[0], scores[sorted_scores[0]]]
-            result_row['subject2'] = [sorted_scores[1], scores[sorted_scores[1]]]
-            result_row['subject3'] = [sorted_scores[2], scores[sorted_scores[2]]]
+            result_row['subject1'] = [sorted_scores[0][0], sorted_scores[0][1]]
+            result_row['subject2'] = [sorted_scores[1][0], sorted_scores[1][1]]
+            result_row['subject3'] = [sorted_scores[2][0], sorted_scores[2][1]]
         except Exception, e:
             if str(e) != "list index out of range":
                 print e
@@ -86,7 +86,6 @@ def eval_questions():
                 result_row['subject_notsure'] = 1
         except:
             pass
-
         result.loc[row_id] = result_row
 
     result.to_csv("result.csv", sep=';')
@@ -94,12 +93,12 @@ def eval_questions():
 
 
 def add_value(name, score_value, scores):
-    name = str(name).encode('utf-8')
     if name is not np.nan and str(name) != 'nan':
-        if name in scores:
-            scores[name] += score_value
+        tup = [item for item in scores if item[0] == name]
+        if not tup:
+            scores.append([name, score_value])
         else:
-            scores[name] = score_value
+            tup[0][1] += score_value
     return scores
 
 
