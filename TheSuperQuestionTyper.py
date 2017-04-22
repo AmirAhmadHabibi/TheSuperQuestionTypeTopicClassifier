@@ -3,8 +3,8 @@ import pandas as pd
 import numpy as np
 import sys
 
-# reload(sys)
-# sys.setdefaultencoding('utf-8')
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 
 def read_files():
@@ -52,7 +52,8 @@ def eval_questions():
     second_score = 4
     third_score = 3
 
-    for row_id, result_row in result.iterrows(): # for each question
+    for row_id, result_row in result.iterrows():  # for each question
+        if row_id % 50 == 0: print row_id
         d16 = data16.loc[row_id]
         d17 = data17.loc[row_id]
         d18 = data18.loc[row_id]
@@ -72,17 +73,21 @@ def eval_questions():
 
         sorted_scores = sorted(scores, key=scores.get, reverse=True)
         try:
-            result_row['subject1'] = [sorted_scores[0], scores[sorted_scores[0]]]
-            result_row['subject2'] = [sorted_scores[1], scores[sorted_scores[1]]]
-            result_row['subject3'] = [sorted_scores[2], scores[sorted_scores[2]]]
-        except:
+            result_row['subject1'] = [str(sorted_scores[0]), scores[sorted_scores[0]]]
+            result_row['subject2'] = [str(sorted_scores[1]), scores[sorted_scores[1]]]
+            result_row['subject3'] = [str(sorted_scores[2]), scores[sorted_scores[2]]]
+        except Exception, e:
+            if str(e) != "list index out of range":
+                print e
             pass
+        # print scores
         result.loc[row_id] = result_row
 
+    result.to_csv("result.csv", sep=';')
     print result[:]
-# TODO: row2012-2013-2026
 
 
+# TODO: nan values should'nt be saved
 def add_value(name, score_value, scores):
     if name is not np.nan:
         if name in scores:
@@ -95,4 +100,4 @@ def add_value(name, score_value, scores):
 read_files()
 # eval_subjects()
 # eval_types()
-# eval_questions()
+eval_questions()
