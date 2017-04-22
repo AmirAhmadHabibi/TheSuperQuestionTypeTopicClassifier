@@ -6,6 +6,10 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
+FIRST_SCORE = 5
+SECOND_SCORE = 4
+THIRD_SCORE = 3
+
 
 def read_files():
     global data16
@@ -41,42 +45,36 @@ def eval_types():
     print 'suggested types for 18 : ' + str(data18[~ data18['suggested_type'].isnull()].shape[0])
 
 
-def eval_questions():
-    # creating a result DataFrame and initiate its columns with nan and 0 values
-    result = data16.copy()
-    result.loc[:, ('subject1', 'subject2', 'subject3', 'suggested_subject',
-                   'type1', 'type2', 'type3', 'suggested_type')] = np.nan
-    result.loc[:, ('subject_notsure', 'type_notsure')] = 0
-
-    first_score = 5
-    second_score = 4
-    third_score = 3
-
+def eval_questions(result):
     for row_id, result_row in result.iterrows():  # for each question
         # if row_id<2770: continue
         if row_id % 50 == 0: print row_id
         d16 = data16.loc[row_id]
         d17 = data17.loc[row_id]
         d18 = data18.loc[row_id]
-        scores = []
+        scores = dict()
 
-        scores = add_value(d16['subject1'], first_score, scores)
-        scores = add_value(d16['subject2'], second_score, scores)
-        scores = add_value(d16['subject3'], third_score, scores)
+        scores = add_value(d16['subject1'], FIRST_SCORE, scores)
+        scores = add_value(d16['subject2'], SECOND_SCORE, scores)
+        scores = add_value(d16['subject3'], THIRD_SCORE, scores)
 
-        scores = add_value(d17['subject1'], first_score, scores)
-        scores = add_value(d17['subject2'], second_score, scores)
-        scores = add_value(d17['subject3'], third_score, scores)
+        scores = add_value(d17['subject1'], FIRST_SCORE, scores)
+        scores = add_value(d17['subject2'], SECOND_SCORE, scores)
+        scores = add_value(d17['subject3'], THIRD_SCORE, scores)
 
-        scores = add_value(d18['subject1'], first_score, scores)
-        scores = add_value(d18['subject2'], second_score, scores)
-        scores = add_value(d18['subject3'], third_score, scores)
+        scores = add_value(d18['subject1'], FIRST_SCORE, scores)
+        scores = add_value(d18['subject2'], SECOND_SCORE, scores)
+        scores = add_value(d18['subject3'], THIRD_SCORE, scores)
 
-        sorted_scores = sorted(scores, key=lambda x: x[1], reverse=True)
+        sorted_scores = sorted(scores, key=scores.get, reverse=True)
+        # print sorted_scores
         try:
-            result_row['subject1'] = [sorted_scores[0][0], sorted_scores[0][1]]
-            result_row['subject2'] = [sorted_scores[1][0], sorted_scores[1][1]]
-            result_row['subject3'] = [sorted_scores[2][0], sorted_scores[2][1]]
+            result_row['subject1'] = sorted_scores[0]
+            result_row['s1 score'] = scores[sorted_scores[0]]
+            result_row['subject2'] = sorted_scores[1]
+            result_row['s2 score'] = scores[sorted_scores[1]]
+            result_row['subject3'] = sorted_scores[2]
+            result_row['s3 score'] = scores[sorted_scores[2]]
         except Exception, e:
             if str(e) != "list index out of range":
                 print e
@@ -86,23 +84,37 @@ def eval_questions():
                 result_row['subject_notsure'] = 1
         except:
             pass
-        result.loc[row_id] = result_row
 
-    result.to_csv("result.csv", sep=';')
-    print result[:]
+        result.loc[row_id] = result_row
 
 
 def add_value(name, score_value, scores):
     if name is not np.nan and str(name) != 'nan':
-        tup = [item for item in scores if item[0] == name]
-        if not tup:
-            scores.append([name, score_value])
+        if name in scores:
+            scores[name] += score_value
         else:
-            tup[0][1] += score_value
+            scores[name] = score_value
     return scores
 
 
-read_files()
-# eval_subjects()
-# eval_types()
-eval_questions()
+def go():
+    read_files()
+    # eval_subjects()
+    # eval_types()
+
+    # creating a result DataFrame and initiate its columns with nan and 0 values
+    result = data16.copy()
+    result.loc[:, ('subject1', 'subject2', 'subject3', 'suggested_subject',
+                   'type1', 'type2', 'type3', 'suggested_type')] = np.nan
+    result.loc[:, ('subject_notsure', 'type_notsure')] = 0
+    result['s1 score'] = [0 for _ in range(len(result))]
+    result['s2 score'] = [0 for _ in range(len(result))]
+    result['s3 score'] = [0 for _ in range(len(result))]
+
+    eval_questions(result)
+
+    print result[:]
+    result.to_csv("result.csv", sep=';')
+
+
+go()
