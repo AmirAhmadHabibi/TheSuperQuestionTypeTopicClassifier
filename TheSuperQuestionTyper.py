@@ -54,7 +54,7 @@ def eval_questions():
 
     for row_id, result_row in result.iterrows():  # for each question
         # if row_id<2770: continue
-        if row_id % 50 == 0: print row_id
+        # if row_id % 50 == 0: print row_id
         d16 = data16.loc[row_id]
         d17 = data17.loc[row_id]
         d18 = data18.loc[row_id]
@@ -74,13 +74,19 @@ def eval_questions():
 
         sorted_scores = sorted(scores, key=scores.get, reverse=True)
         try:
-            result_row['subject1'] = [str(sorted_scores[0]), scores[sorted_scores[0]]]
-            result_row['subject2'] = [str(sorted_scores[1]), scores[sorted_scores[1]]]
-            result_row['subject3'] = [str(sorted_scores[2]), scores[sorted_scores[2]]]
+            result_row['subject1'] = [sorted_scores[0], scores[sorted_scores[0]]]
+            result_row['subject2'] = [sorted_scores[1], scores[sorted_scores[1]]]
+            result_row['subject3'] = [sorted_scores[2], scores[sorted_scores[2]]]
         except Exception, e:
             if str(e) != "list index out of range":
                 print e
             pass
+        try:
+            if result_row['subject1'][1] == result_row['subject2'][1]:
+                result_row['subject_notsure'] = 1
+        except:
+            pass
+
         result.loc[row_id] = result_row
 
     result.to_csv("result.csv", sep=';')
@@ -88,6 +94,7 @@ def eval_questions():
 
 
 def add_value(name, score_value, scores):
+    name = str(name).encode('utf-8')
     if name is not np.nan and str(name) != 'nan':
         if name in scores:
             scores[name] += score_value
