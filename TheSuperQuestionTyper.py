@@ -32,8 +32,7 @@ def read_files():
     data17.loc[2568:2799, ('subject1', 'subject2', 'subject3', 'suggested_subject',
                            'type1', 'type2', 'type3', 'suggested_type')] = np.nan
     data17.loc[2568:2799, ('subject_notsure', 'type_notsure')] = 0
-    # TODO 911 936
-    # print data16.loc[936,'sentence']
+
 
 def eval_subjects():
     print 'not sure subjects for 16 : ' + str(data16['subject_notsure'].value_counts()[1])
@@ -154,6 +153,7 @@ def go():
     result['s1 score'] = [0 for _ in range(len(result))]
     result['s2 score'] = [0 for _ in range(len(result))]
     result['s3 score'] = [0 for _ in range(len(result))]
+    
     result['t1 score'] = [0 for _ in range(len(result))]
     result['t2 score'] = [0 for _ in range(len(result))]
     result['t3 score'] = [0 for _ in range(len(result))]
