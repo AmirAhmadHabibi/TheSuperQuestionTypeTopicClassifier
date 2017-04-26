@@ -6,9 +6,9 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-FIRST_SCORE = 5
-SECOND_SCORE = 4
-THIRD_SCORE = 3
+FIRST_SCORE = 7
+SECOND_SCORE = 6
+THIRD_SCORE = 5
 
 
 def read_files():
@@ -153,14 +153,14 @@ def go():
     result['s1 score'] = [0 for _ in range(len(result))]
     result['s2 score'] = [0 for _ in range(len(result))]
     result['s3 score'] = [0 for _ in range(len(result))]
-    
+
     result['t1 score'] = [0 for _ in range(len(result))]
     result['t2 score'] = [0 for _ in range(len(result))]
     result['t3 score'] = [0 for _ in range(len(result))]
 
     eval_questions(result)
 
-    print result[:]
+    # print result[:]
     result.to_csv("result.csv", sep=';')
 
 
