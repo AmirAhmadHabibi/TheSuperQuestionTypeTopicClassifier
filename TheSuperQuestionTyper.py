@@ -167,19 +167,27 @@ def add_value(name, score_value, scores):
 def extract_suggestions():
     sub_sug = pd.DataFrame(columns=('subject', 'num', 'occurrence_list'))
     for i, row in data16.iterrows():
-        if str(row['suggested_subject']) != 'nan':
-            print "-------------------"
-            sub = row['suggested_subject']
-            print sub, i
-            d = sub_sug[sub_sug['subject'] == sub]
-            if d.empty:
-                sub_sug = sub_sug.append({'subject': sub,
-                                          'num': 1,
-                                          'occurrence_list': [['n16', i]]}, ignore_index=True)
-            else:
-                sub_sug.loc[sub_sug['subject'] == sub, 'num'] = sub_sug.loc[sub_sug['subject'] == sub, 'num'] + 1
-                sub_sug.loc[sub_sug['subject'] == sub, 'occurrence_list'].iloc[0].append(pd.Series(['n16', i]))
-    print sub_sug
+        sub_sug = eval_row_for_suggestions(i, row, sub_sug, 'n16')
+    for i, row in data17.iterrows():
+        sub_sug = eval_row_for_suggestions(i, row, sub_sug, 'n17')
+    for i, row in data18.iterrows():
+        sub_sug = eval_row_for_suggestions(i, row, sub_sug, 'n18')
+
+    # print sub_sug
+    sub_sug.to_csv("suggested_subjects.csv", sep=';', doublequote=True)
+
+
+def eval_row_for_suggestions(i, row, sub_sug, name):
+    if str(row['suggested_subject']) != 'nan':
+        sub = row['suggested_subject']
+        if sub_sug[sub_sug['subject'] == sub].empty:
+            sub_sug = sub_sug.append({'subject': sub,
+                                      'num': 1,
+                                      'occurrence_list': [[name, i]]}, ignore_index=True)
+        else:
+            sub_sug.loc[sub_sug['subject'] == sub, 'num'] = sub_sug.loc[sub_sug['subject'] == sub, 'num'] + 1
+            sub_sug.loc[sub_sug['subject'] == sub, 'occurrence_list'].iloc[0].append([name, i])
+    return sub_sug
 
 
 def go():
@@ -209,8 +217,18 @@ def go():
 
 
 def go2():
-    read_files()
-    extract_suggestions()
+    # read_files()
+    # extract_suggestions()
+    sug_sub = pd.read_csv('suggested_subjects.csv', delimiter=';')
+    # print sug_sub
+    for i, row in sug_sub.iterrows():
+        occ_list = eval(row['occurrence_list'])
+        if len(occ_list) > 1:
+            print "---------"
+            for occ1 in occ_list:
+                for occ2 in occ_list:
+                    if occ1[0]!=occ2[0] and occ1[1]==occ2[1]:
+                        print row['subject'],occ1,occ2
 
 
 go2()
