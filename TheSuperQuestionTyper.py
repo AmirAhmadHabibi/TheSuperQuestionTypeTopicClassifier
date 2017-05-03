@@ -166,28 +166,32 @@ def add_value(name, score_value, scores):
 
 def extract_suggestions():
     sub_sug = pd.DataFrame(columns=('subject', 'num', 'occurrence_list'))
+    typ_sug = pd.DataFrame(columns=('type', 'num', 'occurrence_list'))
     for i, row in data16.iterrows():
-        sub_sug = eval_row_for_suggestions(i, row, sub_sug, 'n16')
+        sub_sug = eval_row_for_suggestions(i, row, sub_sug, 'n16', 'subject')
+        typ_sug = eval_row_for_suggestions(i, row, typ_sug, 'n16', 'type')
     for i, row in data17.iterrows():
-        sub_sug = eval_row_for_suggestions(i, row, sub_sug, 'n17')
+        sub_sug = eval_row_for_suggestions(i, row, sub_sug, 'n17', 'subject')
+        typ_sug = eval_row_for_suggestions(i, row, typ_sug, 'n17', 'type')
     for i, row in data18.iterrows():
-        sub_sug = eval_row_for_suggestions(i, row, sub_sug, 'n18')
+        sub_sug = eval_row_for_suggestions(i, row, sub_sug, 'n18', 'subject')
+        typ_sug = eval_row_for_suggestions(i, row, typ_sug, 'n18', 'type')
 
-    # print sub_sug
     sub_sug.to_csv("suggested_subjects.csv", sep=';', doublequote=True)
+    typ_sug.to_csv("suggested_types.csv", sep=';', doublequote=True)
 
 
-def eval_row_for_suggestions(i, row, sub_sug, name):
-    if str(row['suggested_subject']) != 'nan':
-        sub = row['suggested_subject']
-        if sub_sug[sub_sug['subject'] == sub].empty:
-            sub_sug = sub_sug.append({'subject': sub,
-                                      'num': 1,
-                                      'occurrence_list': [[name, i]]}, ignore_index=True)
+def eval_row_for_suggestions(i, row, sug, name, col):
+    if str(row['suggested_' + col]) != 'nan':
+        sub = row['suggested_' + col]
+        if sug[sug[col] == sub].empty:
+            sug = sug.append({col: sub,
+                              'num': 1,
+                              'occurrence_list': [[name, i]]}, ignore_index=True)
         else:
-            sub_sug.loc[sub_sug['subject'] == sub, 'num'] = sub_sug.loc[sub_sug['subject'] == sub, 'num'] + 1
-            sub_sug.loc[sub_sug['subject'] == sub, 'occurrence_list'].iloc[0].append([name, i])
-    return sub_sug
+            sug.loc[sug[col] == sub, 'num'] = sug.loc[sug[col] == sub, 'num'] + 1
+            sug.loc[sug[col] == sub, 'occurrence_list'].iloc[0].append([name, i])
+    return sug
 
 
 def go():
@@ -220,18 +224,27 @@ def go2():
     # read_files()
     # extract_suggestions()
     sug_sub = pd.read_csv('suggested_subjects.csv', delimiter=';')
-    # print sug_sub
-    for i, row in sug_sub.iterrows():
+    typ_sub = pd.read_csv('suggested_types.csv', delimiter=';')
+    print typ_sub
+
+    # # for i, row in sug_sub.iterrows():
+    # #     occ_list = eval(row['occurrence_list'])
+    # #     if len(occ_list) > 1:
+    # #         for occ1 in occ_list:
+    # #             for occ2 in occ_list:
+    # #                 if occ1[0] != occ2[0] and occ1[1] == occ2[1]:
+    # #                     print row['subject'], occ1, occ2  # Shared opinion
+    # print "---------"
+    for i, row in typ_sub.iterrows():
         occ_list = eval(row['occurrence_list'])
         if len(occ_list) > 1:
-            print "---------"
             for occ1 in occ_list:
                 for occ2 in occ_list:
-                    if occ1[0]!=occ2[0] and occ1[1]==occ2[1]:
-                        print row['subject'],occ1,occ2
+                    if occ1[0] != occ2[0] and occ1[1] == occ2[1]:
+                        print row['type'], occ1, occ2  # Shared opinion
 
 
-go2()
+# go2()
 
 """۱- لیستی از برچسب‌های جدید پیشنهادی به همراه تکرار هر کدام تهیه کنید
 ۲- از آنجا که اگر برچسبی توسط بیش از یک نفر پیشنهاد شده باشد برای ما اهمیت دارد 
