@@ -165,19 +165,20 @@ def add_value(name, score_value, scores):
 
 
 def extract_suggestions():
-    sub_sug = pd.DataFrame(columns=('suggested_subject', 'num', 'occurrence_list'))
+    sub_sug = pd.DataFrame(columns=('subject', 'num', 'occurrence_list'))
     for i, row in data16.iterrows():
         if str(row['suggested_subject']) != 'nan':
-            d = sub_sug[sub_sug['suggested_subject'] == row['suggested_subject']]
+            print "-------------------"
+            sub = row['suggested_subject']
+            print sub, i
+            d = sub_sug[sub_sug['subject'] == sub]
             if d.empty:
-                # print row['suggested_subject']
-                sub_sug = sub_sug.append({'suggested_subject': row['suggested_subject'],
-                                'num': int(0),
-                                'occurrence_list': []}, ignore_index=True)
-                # print sub_sug
-                d = sub_sug[sub_sug['suggested_subject'] == row['suggested_subject']]
-            print d
-            d['occurrence_list'].append(['16', i])
+                sub_sug = sub_sug.append({'subject': sub,
+                                          'num': 1,
+                                          'occurrence_list': [['n16', i]]}, ignore_index=True)
+            else:
+                sub_sug.loc[sub_sug['subject'] == sub, 'num'] = sub_sug.loc[sub_sug['subject'] == sub, 'num'] + 1
+                sub_sug.loc[sub_sug['subject'] == sub, 'occurrence_list'].iloc[0].append(pd.Series(['n16', i]))
     print sub_sug
 
 
