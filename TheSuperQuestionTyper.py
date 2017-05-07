@@ -74,6 +74,26 @@ def eval_types():
     print 'suggested types for 18 : ' + str(data18[~ data18['suggested_type'].isnull()].shape[0])
 
 
+def add_to_subjs(sub, col):
+    global subjs
+    if sub is not np.nan and str(sub) != 'nan':
+        if subjs[subjs['tag'] == sub].empty:
+            subjs = subjs.append({'tag': sub, 'total_num': 0, 'num16': 0, 'num17': 0, 'num18': 0}, ignore_index=True)
+
+        subjs.loc[subjs['tag'] == sub, 'total_num'] = subjs.loc[subjs['tag'] == sub, 'total_num'] + 1
+        subjs.loc[subjs['tag'] == sub, col] = subjs.loc[subjs['tag'] == sub, col] + 1
+
+
+def add_to_types(sub, col):
+    global types
+    if sub is not np.nan and str(sub) != 'nan':
+        if types[types['tag'] == sub].empty:
+            types = types.append({'tag': sub, 'total_num': 0, 'num16': 0, 'num17': 0, 'num18': 0}, ignore_index=True)
+
+        types.loc[types['tag'] == sub, 'total_num'] = types.loc[types['tag'] == sub, 'total_num'] + 1
+        types.loc[types['tag'] == sub, col] = types.loc[types['tag'] == sub, col] + 1
+
+
 def eval_questions(result):
     for row_id, result_row in result.iterrows():  # for each question
         if row_id % 100 == 0: print row_id
@@ -83,21 +103,32 @@ def eval_questions(result):
 
         # evaluate subjects
         scores = dict()
+        sbj_num = 0
 
-        scores = add_value(d16['subject1'], FIRST_SCORE - d16['subject_notsure'], scores)
-        scores = add_value(d16['subject2'], SECOND_SCORE - d16['subject_notsure'], scores)
-        scores = add_value(d16['subject3'], THIRD_SCORE - d16['subject_notsure'], scores)
+        add_to_subjs(d16['subject1'], 'num16')
+        add_to_subjs(d16['subject2'], 'num16')
+        add_to_subjs(d16['subject3'], 'num16')
+        add_to_subjs(d17['subject1'], 'num17')
+        add_to_subjs(d17['subject2'], 'num17')
+        add_to_subjs(d17['subject3'], 'num17')
+        add_to_subjs(d18['subject1'], 'num18')
+        add_to_subjs(d18['subject2'], 'num18')
+        add_to_subjs(d18['subject3'], 'num18')
 
-        scores = add_value(d17['subject1'], FIRST_SCORE - d17['subject_notsure'], scores)
-        scores = add_value(d17['subject2'], SECOND_SCORE - d17['subject_notsure'], scores)
-        scores = add_value(d17['subject3'], THIRD_SCORE - d17['subject_notsure'], scores)
+        scores, sbj_num = add_value(d16['subject1'], FIRST_SCORE - d16['subject_notsure'], scores, sbj_num)
+        scores, sbj_num = add_value(d16['subject2'], SECOND_SCORE - d16['subject_notsure'], scores, sbj_num)
+        scores, sbj_num = add_value(d16['subject3'], THIRD_SCORE - d16['subject_notsure'], scores, sbj_num)
 
-        scores = add_value(d18['subject1'], FIRST_SCORE - d17['subject_notsure'], scores)
-        scores = add_value(d18['subject2'], SECOND_SCORE - d17['subject_notsure'], scores)
-        scores = add_value(d18['subject3'], THIRD_SCORE - d17['subject_notsure'], scores)
+        scores, sbj_num = add_value(d17['subject1'], FIRST_SCORE - d17['subject_notsure'], scores, sbj_num)
+        scores, sbj_num = add_value(d17['subject2'], SECOND_SCORE - d17['subject_notsure'], scores, sbj_num)
+        scores, sbj_num = add_value(d17['subject3'], THIRD_SCORE - d17['subject_notsure'], scores, sbj_num)
 
+        scores, sbj_num = add_value(d18['subject1'], FIRST_SCORE - d17['subject_notsure'], scores, sbj_num)
+        scores, sbj_num = add_value(d18['subject2'], SECOND_SCORE - d17['subject_notsure'], scores, sbj_num)
+        scores, sbj_num = add_value(d18['subject3'], THIRD_SCORE - d17['subject_notsure'], scores, sbj_num)
+
+        Avg_sbj_num = sbj_num / 3.0
         sorted_scores = sorted(scores, key=scores.get, reverse=True)
-
         try:
             if scores[sorted_scores[0]] > 10:
                 result_row['subject1'] = sorted_scores[0]
@@ -111,7 +142,7 @@ def eval_questions(result):
                 print e
             pass
         try:
-            if scores[sorted_scores[0]] > 10 and result_row['subject1'][1] == result_row['subject2'][1]:
+            if scores[sorted_scores[0]] > 10 and result_row['s1 score'] == result_row['s2 score']:
                 result_row['subject_notsure'] = 1
         except:
             pass
@@ -119,19 +150,31 @@ def eval_questions(result):
         #########################################################
         # evaluate types
         scores = dict()
+        typ_num = 0
+        
+        add_to_types(d16['type1'], 'num16')
+        add_to_types(d16['type2'], 'num16')
+        add_to_types(d16['type3'], 'num16')
+        add_to_types(d17['type1'], 'num17')
+        add_to_types(d17['type2'], 'num17')
+        add_to_types(d17['type3'], 'num17')
+        add_to_types(d18['type1'], 'num18')
+        add_to_types(d18['type2'], 'num18')
+        add_to_types(d18['type3'], 'num18')
 
-        scores = add_value(d16['type1'], FIRST_SCORE - d16['type_notsure'], scores)
-        scores = add_value(d16['type2'], SECOND_SCORE - d16['type_notsure'], scores)
-        scores = add_value(d16['type3'], THIRD_SCORE - d16['type_notsure'], scores)
+        scores, typ_num = add_value(d16['type1'], FIRST_SCORE - d16['type_notsure'], scores, typ_num)
+        scores, typ_num = add_value(d16['type2'], SECOND_SCORE - d16['type_notsure'], scores, typ_num)
+        scores, typ_num = add_value(d16['type3'], THIRD_SCORE - d16['type_notsure'], scores, typ_num)
 
-        scores = add_value(d17['type1'], FIRST_SCORE - d17['type_notsure'], scores)
-        scores = add_value(d17['type2'], SECOND_SCORE - d17['type_notsure'], scores)
-        scores = add_value(d17['type3'], THIRD_SCORE - d17['type_notsure'], scores)
+        scores, typ_num = add_value(d17['type1'], FIRST_SCORE - d17['type_notsure'], scores, typ_num)
+        scores, typ_num = add_value(d17['type2'], SECOND_SCORE - d17['type_notsure'], scores, typ_num)
+        scores, typ_num = add_value(d17['type3'], THIRD_SCORE - d17['type_notsure'], scores, typ_num)
 
-        scores = add_value(d18['type1'], FIRST_SCORE - d17['type_notsure'], scores)
-        scores = add_value(d18['type2'], SECOND_SCORE - d17['type_notsure'], scores)
-        scores = add_value(d18['type3'], THIRD_SCORE - d17['type_notsure'], scores)
+        scores, typ_num = add_value(d18['type1'], FIRST_SCORE - d17['type_notsure'], scores, typ_num)
+        scores, typ_num = add_value(d18['type2'], SECOND_SCORE - d17['type_notsure'], scores, typ_num)
+        scores, typ_num = add_value(d18['type3'], THIRD_SCORE - d17['type_notsure'], scores, typ_num)
 
+        Avg_typ_num = typ_num / 3.0
         sorted_scores = sorted(scores, key=scores.get, reverse=True)
 
         try:
@@ -147,21 +190,24 @@ def eval_questions(result):
                 print e
             pass
         try:
-            if scores[sorted_scores[0]] > 10 and result_row['type1'][1] == result_row['type2'][1]:
+            if scores[sorted_scores[0]] > 10 and result_row['t1 score'] == result_row['t2 score']:
                 result_row['type_notsure'] = 1
         except:
             pass
 
+        result_row['Avg_typ_num'] = Avg_typ_num
+        result_row['Avg_sbj_num'] = Avg_sbj_num
         result.loc[row_id] = result_row
 
 
-def add_value(name, score_value, scores):
+def add_value(name, score_value, scores, num):
     if name is not np.nan and str(name) != 'nan':
+        num += 1
         if name in scores:
             scores[name] += score_value
         else:
             scores[name] = score_value
-    return scores
+    return scores, num
 
 
 def extract_suggestions():
@@ -195,9 +241,12 @@ def eval_row_for_suggestions(i, row, sug, name, col):
 
 
 def go():
+    global types
+    global subjs
+
     read_files()
-    eval_subjects()
-    eval_types()
+    # eval_subjects()
+    # eval_types()
 
     # creating a result DataFrame and initiate its columns with nan and 0 values
     result = data16.copy()
@@ -212,12 +261,20 @@ def go():
     result['t2 score'] = [0 for _ in range(len(result))]
     result['t3 score'] = [0 for _ in range(len(result))]
 
+    result['Avg_sbj_num'] = [0 for _ in range(len(result))]
+    result['Avg_typ_num'] = [0 for _ in range(len(result))]
+
+    types = pd.DataFrame(columns=('tag', 'total_num', 'num16', 'num17', 'num18'))
+    subjs = pd.DataFrame(columns=('tag', 'total_num', 'num16', 'num17', 'num18'))
+
     eval_questions(result)
 
-    # print result[:]
+    print types
+    print subjs
+
     result.to_csv("result.csv", sep=';', doublequote=True)
-    print 'not sure subjects for result : ' + str(result['subject_notsure'].value_counts()[1])
-    print 'not sure types for result : ' + str(result['type_notsure'].value_counts()[1])
+    types.to_csv("types.csv", sep=';', doublequote=True)
+    subjs.to_csv("subjs.csv", sep=';', doublequote=True)
 
 
 def go2():
@@ -244,11 +301,4 @@ def go2():
                         print row['type'], occ1, occ2  # Shared opinion
 
 
-# go2()
-
-"""۱- لیستی از برچسب‌های جدید پیشنهادی به همراه تکرار هر کدام تهیه کنید
-۲- از آنجا که اگر برچسبی توسط بیش از یک نفر پیشنهاد شده باشد برای ما اهمیت دارد 
-اگر برچسب‌های جدید پیشنهادی دو نفر برای یک سوال یکسان بود آن‌ها را هم در یک فایل جدا
- گزارش کنید تا بررسی کنم.
-۳- تعداد متوسط برچسب هر سوال را استخراج کنید
-۴- تعداد تکرار هر برچسب در کل سوالات مستقل از امتیاز و رنک آن‌ها را استخراج کنید"""
+go()
