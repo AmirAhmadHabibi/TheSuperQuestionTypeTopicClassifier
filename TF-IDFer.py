@@ -27,16 +27,19 @@ def get_word_list(qstn):
 
 def go():
     questions = pd.read_csv('result.csv', delimiter=';')
-    questions = questions['sentence']
     # num_questions_containing - frequency_in_question
-    words = pd.DataFrame(columns=('term', 'IDF', 'TF', 'num_q', 'f_in_q'), index='word')
+    words = pd.DataFrame(columns=('term', 'IDF', 'TF', 'num_q', 'f_in_q'))
 
     for q_id, qstn in questions.iterrows():
+        qstn = qstn['sentence']
+        
         for word, f in get_word_list(qstn):
-            if words[words['word'] == word].empty:
-                words.append({'term': word, 'IDF': 0, 'TF': 0, 'num_q': 0, 'f_in_q': []})
-            words.loc[word, 'f_in_q'] = f
-            words.loc[word, 'num_q'] = words.loc[word, 'num_q'] + 1
+            if words[words['term'] == word].empty:
+                words = words.append({'term': word, 'IDF': 0, 'TF': 0, 'num_q': 1, 'f_in_q': [[q_id, f]]},
+                                     ignore_index=True)
+            else:
+                words.loc[words['term'] == word, 'f_in_q'].iloc[0].append([q_id, f])
+                words.loc[words['term'] == word, 'num_q'] = words.loc[words['term'] == word, 'num_q'] + 1
 
 
 go()
