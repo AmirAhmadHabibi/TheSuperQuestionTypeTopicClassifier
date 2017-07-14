@@ -70,16 +70,20 @@ def save_vector():
     words.to_csv('words_vector.csv', sep=';', index=False)
 
 
-save_vector()
+def replace_bad_characters():
+    items = pd.read_csv('result_filtered.csv', delimiter=';')
+    for i, row in items.iterrows():
+        term = items.loc[i, 'title']
+        if str(term) == 'nan':
+            continue
+        term = term.replace('ي', 'ی')
+        term = term.replace('ى', 'ی')
+        term = term.replace('ك', 'ک')
+        term = term.replace(' ', ' ')
+        term = term.replace('‌', ' ')
+        term = term.replace('‏', ' ')
+        items.loc[i, 'title'] = term
+    items.to_csv('result_filtered.csv', sep=';', index=False)
 
-# words = pd.read_csv('result.csv', delimiter=';')
-# for i, row in words.iterrows():
-#     term = words.loc[i, 'sentence']
-#     term = term.replace('ي', 'ی')
-#     term = term.replace('ى', 'ی')
-#     term = term.replace('ك', 'ک')
-#     term = term.replace(' ', ' ')
-#     term = term.replace('‌', ' ')
-#     term = term.replace('‏', ' ')
-#     words.loc[i, 'sentence'] = term
-# words.to_csv('result.csv', sep=';', index=False)
+
+save_vector()

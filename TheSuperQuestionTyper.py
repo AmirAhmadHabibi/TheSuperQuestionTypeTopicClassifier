@@ -240,7 +240,7 @@ def eval_row_for_suggestions(i, row, sug, name, col):
     return sug
 
 
-def go():
+def combine():
     global types
     global subjs
 
@@ -277,7 +277,7 @@ def go():
     subjs.to_csv("subjs.csv", sep=';', doublequote=True)
 
 
-def go2():
+def shared_opinion():
     # read_files()
     # extract_suggestions()
     sug_sub = pd.read_csv('suggested_subjects.csv', delimiter=';')
@@ -301,7 +301,7 @@ def go2():
                         print row['type'], occ1, occ2  # Shared opinion
 
 
-def remove_low_scores_and_get_subtyps():
+def remove_low_scores_and_save_subtyps():
     global types
     global subjs
     result = pd.read_csv('result.csv', delimiter=';')
@@ -387,4 +387,6 @@ def remove_low_scores_and_get_subtyps():
     subjs.to_csv("subjs-result.csv", sep=';', doublequote=True)
 
 
-go3()
+# combine()
+# shared_opinion()
+remove_low_scores_and_save_subtyps()
