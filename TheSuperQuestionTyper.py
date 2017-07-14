@@ -301,7 +301,7 @@ def go2():
                         print row['type'], occ1, occ2  # Shared opinion
 
 
-def go3():
+def remove_low_scores_and_get_subtyps():
     global types
     global subjs
     result = pd.read_csv('result.csv', delimiter=';')
@@ -378,7 +378,6 @@ def go3():
             if types[types['tag'] == type].empty:
                 types = types.append({'tag': type, 'num': 0}, ignore_index=True)
             types.loc[types['tag'] == type, 'num'] = types.loc[types['tag'] == type, 'num'] + 1
-
 
     print 'sub', sub
     print 'typ', typ

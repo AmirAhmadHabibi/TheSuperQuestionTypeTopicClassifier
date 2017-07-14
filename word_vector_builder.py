@@ -7,8 +7,11 @@ def tokenise(qstn):
                '،', '.', '­', '«', '»', '_', '+', '=', ]:
         qstn = qstn.replace(ch, ' ')
     qstn = qstn.replace('ي', 'ی')
+    qstn = qstn.replace('ى', 'ی')
     qstn = qstn.replace('ك', 'ک')
-
+    qstn = qstn.replace(' ', ' ')
+    qstn = qstn.replace('‌', ' ')
+    qstn = qstn.replace('‏', ' ')
     # TODO: use a better method
     return qstn.split()
 
@@ -29,7 +32,7 @@ def get_word_list(qstn):
 
 
 def count_words():
-    questions = pd.read_csv('result.csv', delimiter=';')
+    questions = pd.read_csv('result_filtered.csv', delimiter=';')
     words = pd.DataFrame(columns=('term', 'num'))
 
     # iterate on questions
@@ -47,23 +50,36 @@ def count_words():
     return words
 
 
-def do_it():
+def save_vector():
     # count and write to file
     # words = count_words()
-    # print words
     # words.to_csv('words_with_count.csv', sep=';', index=False)
 
     # pick the first 1000
     words = pd.read_csv('words_with_count.csv', delimiter=';')
     stop_words = pd.read_csv('PersianStopWordList.txt', delimiter=';', header=None)
-
+    # remove the stop words
     for stop_word in stop_words.as_matrix():
         words = words[words.term != stop_word[0]]
-
+    # sort by frequency number
     words = words.sort_values(by='num', ascending=False)
     words = words.reset_index(drop=True)
+    # save first 1000 to file
+    words = words[:1000]
+    words = words[['term']]
+    words.to_csv('words_vector.csv', sep=';', index=False)
 
-    print words
 
+save_vector()
 
-do_it()
+# words = pd.read_csv('result.csv', delimiter=';')
+# for i, row in words.iterrows():
+#     term = words.loc[i, 'sentence']
+#     term = term.replace('ي', 'ی')
+#     term = term.replace('ى', 'ی')
+#     term = term.replace('ك', 'ک')
+#     term = term.replace(' ', ' ')
+#     term = term.replace('‌', ' ')
+#     term = term.replace('‏', ' ')
+#     words.loc[i, 'sentence'] = term
+# words.to_csv('result.csv', sep=';', index=False)
