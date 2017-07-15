@@ -1,17 +1,12 @@
 # coding=utf-8
 import pandas as pd
+import numpy as np
 
 
 def tokenise(qstn):
     for ch in [':', ';', ',', '?', '!', '\'', '\"', '\\', '/', '(', ')', '[', ']', '…', '...', '–', '-', '<', '>', '؟',
                '،', '.', '­', '«', '»', '_', '+', '=', ]:
         qstn = qstn.replace(ch, ' ')
-    qstn = qstn.replace('ي', 'ی')
-    qstn = qstn.replace('ى', 'ی')
-    qstn = qstn.replace('ك', 'ک')
-    qstn = qstn.replace(' ', ' ')
-    qstn = qstn.replace('‌', ' ')
-    qstn = qstn.replace('‏', ' ')
     # TODO: use a better method
     return qstn.split()
 
@@ -58,9 +53,14 @@ def save_vector():
     # pick the first 1000
     words = pd.read_csv('words_with_count.csv', delimiter=';')
     stop_words = pd.read_csv('PersianStopWordList.txt', delimiter=';', header=None)
+    words = words.dropna(subset={'term'})
     # remove the stop words
     for stop_word in stop_words.as_matrix():
         words = words[words.term != stop_word[0]]
+    # remove numbers
+    for i, word in words.iterrows():
+        if word['term'].isdigit():
+            words = words[words.term != word['term']]
     # sort by frequency number
     words = words.sort_values(by='num', ascending=False)
     words = words.reset_index(drop=True)
