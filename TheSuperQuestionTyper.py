@@ -17,9 +17,9 @@ def read_files():
     global data18
 
     # id;title;sentence;subject1;subject2;subject3;subject_notsure;suggested_subject;type1;type2;type3;type_notsure;suggested_type
-    data16 = pd.read_csv('16-javaheri_e.csv', delimiter=';', index_col=['id'])
-    data17 = pd.read_csv('17-sheikholeslami_e.csv', delimiter=';', index_col=['id'])
-    data18 = pd.read_csv('18-sayahi_e.csv', delimiter=';', index_col=['id'])
+    data16 = pd.read_csv('./1_combine_tags/16-javaheri_e.csv', delimiter=';', index_col=['id'])
+    data17 = pd.read_csv('./1_combine_tags/17-sheikholeslami_e.csv', delimiter=';', index_col=['id'])
+    data18 = pd.read_csv('./1_combine_tags/18-sayahi_e.csv', delimiter=';', index_col=['id'])
 
     data16['sentence'] = data16.apply(lambda row: row['sentence'].replace('؛', '.'), axis='columns')
     data17['sentence'] = data17.apply(lambda row: row['sentence'].replace('؛', '.'), axis='columns')
@@ -58,11 +58,28 @@ def read_files():
 
 def eval_subjects():
     print 'not sure subjects for 16 : ' + str(data16['subject_notsure'].value_counts()[1])
-    print 'not sure subjects for 17 : ' + str(data17['subject_notsure'].value_counts()[1])
-    print 'not sure subjects for 18 : ' + str(data18['subject_notsure'].value_counts()[1])
     print 'suggested subjects for 16 : ' + str(data16[~data16['suggested_subject'].isnull()].shape[0])
+    print 'no label and Suggestion for 16 : ' + str(
+        data16[(data16['suggested_subject'].isnull()) & (data16['subject1'].isnull())].shape[0])
+    print '1 label 16 : ' + str(data16[(data16['subject2'].isnull()) & (~data16['subject1'].isnull())].shape[0])
+    print '2 label 16 : ' + str(data16[data16['subject3'].isnull() & ~data16['subject2'].isnull()].shape[0])
+    print '3 label 16 : ' + str(data16[~data16['subject3'].isnull()].shape[0])
+
+    print 'not sure subjects for 17 : ' + str(data17['subject_notsure'].value_counts()[1])
     print 'suggested subjects for 17 : ' + str(data17[~data17['suggested_subject'].isnull()].shape[0])
+    print 'no label and Suggestion for 17 : ' + str(
+        data17[data17['suggested_subject'].isnull() & data17['subject1'].isnull()].shape[0])
+    print '1 label 17 : ' + str(data17[data17['subject2'].isnull() & ~data17['subject1'].isnull()].shape[0])
+    print '2 label 17 : ' + str(data17[data17['subject3'].isnull() & ~data17['subject2'].isnull()].shape[0])
+    print '3 label 17 : ' + str(data17[~data17['subject3'].isnull()].shape[0])
+
+    print 'not sure subjects for 18 : ' + str(data18['subject_notsure'].value_counts()[1])
     print 'suggested subjects for 18 : ' + str(data18[~data18['suggested_subject'].isnull()].shape[0])
+    print 'no label and Suggestion for 18 : ' + str(
+        data18[data18['suggested_subject'].isnull() & data18['subject1'].isnull()].shape[0])
+    print '1 label 18 : ' + str(data18[data18['subject2'].isnull() & ~data18['subject1'].isnull()].shape[0])
+    print '2 label 18 : ' + str(data18[data18['subject3'].isnull() & ~data18['subject2'].isnull()].shape[0])
+    print '3 label 18 : ' + str(data18[~data18['subject3'].isnull()].shape[0])
 
 
 def eval_types():
@@ -347,13 +364,13 @@ def remove_low_scores_and_save_subtyps():
             if subjs[subjs['tag'] == subject].empty:
                 subjs = subjs.append({'tag': subject, 'num': 0}, ignore_index=True)
             subjs.loc[subjs['tag'] == subject, 'num'] = subjs.loc[subjs['tag'] == subject, 'num'] + 1
-            
+
         subject = row['subject2']
         if subject is not np.nan and str(subject) != 'nan':
             if subjs[subjs['tag'] == subject].empty:
                 subjs = subjs.append({'tag': subject, 'num': 0}, ignore_index=True)
             subjs.loc[subjs['tag'] == subject, 'num'] = subjs.loc[subjs['tag'] == subject, 'num'] + 1
-        
+
         subject = row['subject3']
         if subject is not np.nan and str(subject) != 'nan':
             if subjs[subjs['tag'] == subject].empty:
@@ -389,4 +406,6 @@ def remove_low_scores_and_save_subtyps():
 
 # combine()
 # shared_opinion()
-remove_low_scores_and_save_subtyps()
+# remove_low_scores_and_save_subtyps()
+read_files()
+eval_subjects()
