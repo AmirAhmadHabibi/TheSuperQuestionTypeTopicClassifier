@@ -35,7 +35,7 @@ def build_train_data_for_subjs():
                 train.loc[i, word] = 1
             else:
                 train.loc[i, word] = 0
-        print train.loc[i]
+                # print train.loc[i]
 
     # rename columns
     number = 0
@@ -44,20 +44,47 @@ def build_train_data_for_subjs():
             train = train.rename(columns={col: 'a' + str(number)})
             number += 1
 
-    train.to_csv('train.csv', index=False)
+    train.to_csv('subject.csv', index=False)
+
+
+def build_train_data_for_types():
+    questions = pd.read_csv('result_filtered.csv', delimiter=';')
+    qvectors = pd.read_csv('vector1000.csv')
+    types = pd.read_csv('./1_combine_tags/types-result.csv', delimiter=';')
+
+    qvectors = qvectors.drop(
+        {'a0', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8', 'a9', 'a10', 'a11', 'a12', 'a13', 'a14', 'a15', 'a16',
+         'a17', 'a18', 'a19', 'a20', 'a21', 'a22', 'a23'},axis=1)
+    # creating dataframe
+    train = pd.DataFrame(dtype=object)
+    for i, typ in types.iterrows():
+        train['typ' + str(typ['id'])] = 0
+
+    # build the train data
+    for i, qrow in questions.iterrows():
+        if i % 100 == 0: sys.stdout.write('\r' + 'processed question ' + str(i))
+        # set occurrence of the subjects
+        for j, typ in types.iterrows():
+            typ_id = str(typ['id'])
+            train.loc[i, 'typ' + typ_id] = 0
+            if qrow['type1'] == typ['tag'] or qrow['type2'] == typ['tag'] or qrow['type3'] == typ['tag']:
+                train.loc[i, 'typ' + typ_id] = 1
+
+    result = pd.concat([train, qvectors], axis=1)
+    result.to_csv('train-type.csv', index=False)
 
 
 def create_arff_header():
     header = '@relation \'CQA\'\n\n'
-    for i in range(0, 23):
+    for i in range(0, 12):
         header += '@attribute s' + str(i) + ' {0,1}\n'
-    for i in range(23, 984):
+    for i in range(12, 313):
         header += '@attribute a' + str(i) + ' numeric\n'
     header += '\n@data\n'
     print header
 
 
-def concat_word2vec_target():
+def concat_word2vec_subjs():
     w2v = pd.read_csv('questions-word2vec.txt', header=None)
     questions = pd.read_csv('result_filtered.csv', delimiter=';')
     subjs = pd.read_csv('./1_combine_tags/subjs-result.csv', delimiter=';')
@@ -73,11 +100,38 @@ def concat_word2vec_target():
             trn.loc[i, 'sub' + sub_id] = 0
             if qrow['subject1'] == subj['tag'] or qrow['subject2'] == subj['tag'] or qrow['subject3'] == subj['tag']:
                 trn.loc[i, 'sub' + sub_id] = 1
-        # print i, '----',trn.loc[i]
+                # print i, '----',trn.loc[i]
 
     result = pd.concat([trn, w2v], axis=1)
-    result.to_csv('train.csv', index=False, header=None)
+    result.to_csv('subj-word2vec.csv', index=False, header=None)
+
+
+def concat_word2vec_types():
+    questions = pd.read_csv('result_filtered.csv', delimiter=';')
+    w2v = pd.read_csv('questions-word2vec.txt', header=None)
+    types = pd.read_csv('./1_combine_tags/types-result.csv', delimiter=';')
+
+    # creating dataframe
+    train = pd.DataFrame(dtype=object)
+    for i, typ in types.iterrows():
+        train['typ' + str(typ['id'])] = 0
+
+    # build the train data
+    for i, qrow in questions.iterrows():
+        if i % 100 == 0: sys.stdout.write('\r' + 'processed question ' + str(i))
+        # set occurrence of the subjects
+        for j, typ in types.iterrows():
+            typ_id = str(typ['id'])
+            train.loc[i, 'typ' + typ_id] = 0
+            if qrow['type1'] == typ['tag'] or qrow['type2'] == typ['tag'] or qrow['type3'] == typ['tag']:
+                train.loc[i, 'typ' + typ_id] = 1
+
+    result = pd.concat([train, w2v], axis=1)
+    result.to_csv('type-word2vec.csv', index=False)
+
 
 # build_train_data_for_subjs()
-# create_arff_header()
-concat_word2vec_target()
+create_arff_header()
+# concat_word2vec_subjs()
+# build_train_data_for_types()
+# concat_word2vec_types()

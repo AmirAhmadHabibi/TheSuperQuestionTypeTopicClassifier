@@ -321,7 +321,7 @@ def shared_opinion():
 def remove_low_scores_and_save_subtyps():
     global types
     global subjs
-    result = pd.read_csv('result.csv', delimiter=';')
+    result = pd.read_csv('result_filtered.csv', delimiter=';')
     sub = [0, 0, 0, 0]
     typ = [0, 0, 0, 0]
     types = pd.DataFrame(columns=('tag', 'num'))
@@ -329,35 +329,35 @@ def remove_low_scores_and_save_subtyps():
     for row_id, row in result.iterrows():  # remove the ones with a score less than 11
         if row_id % 100 == 0: print row_id
 
-        if row['s1 score'] <= 10:
-            sub[0] = sub[0] + 1
-            result.loc[row_id, ('subject1', 'subject2', 'subject3')] = np.nan
-            result.loc[row_id, ('s1 score', 's2 score', 's3 score')] = 0
-        elif row['s2 score'] <= 10:
-            sub[1] = sub[1] + 1
-            result.loc[row_id, ('subject2', 'subject3')] = np.nan
-            result.loc[row_id, ('s2 score', 's3 score')] = 0
-        elif row['s3 score'] <= 10:
-            sub[2] = sub[2] + 1
-            result.loc[row_id, 'subject3'] = np.nan
-            result.loc[row_id, 's3 score'] = 0
-        else:
-            sub[3] = sub[3] + 1
-
-        if row['t1 score'] <= 10:
-            typ[0] = typ[0] + 1
-            result.loc[row_id, ('type1', 'type2', 'type3')] = np.nan
-            result.loc[row_id, ('t1 score', 't2 score', 't3 score')] = 0
-        elif row['t2 score'] <= 10:
-            typ[1] = typ[1] + 1
-            result.loc[row_id, ('type2', 'type3')] = np.nan
-            result.loc[row_id, ('t2 score', 't3 score')] = 0
-        elif row['t3 score'] <= 10:
-            typ[2] = typ[2] + 1
-            result.loc[row_id, 'type3'] = np.nan
-            result.loc[row_id, 't3 score'] = 0
-        else:
-            typ[3] = typ[3] + 1
+        # if row['s1 score'] <= 10:
+        #     sub[0] = sub[0] + 1
+        #     result.loc[row_id, ('subject1', 'subject2', 'subject3')] = np.nan
+        #     result.loc[row_id, ('s1 score', 's2 score', 's3 score')] = 0
+        # elif row['s2 score'] <= 10:
+        #     sub[1] = sub[1] + 1
+        #     result.loc[row_id, ('subject2', 'subject3')] = np.nan
+        #     result.loc[row_id, ('s2 score', 's3 score')] = 0
+        # elif row['s3 score'] <= 10:
+        #     sub[2] = sub[2] + 1
+        #     result.loc[row_id, 'subject3'] = np.nan
+        #     result.loc[row_id, 's3 score'] = 0
+        # else:
+        #     sub[3] = sub[3] + 1
+        #
+        # if row['t1 score'] <= 10:
+        #     typ[0] = typ[0] + 1
+        #     result.loc[row_id, ('type1', 'type2', 'type3')] = np.nan
+        #     result.loc[row_id, ('t1 score', 't2 score', 't3 score')] = 0
+        # elif row['t2 score'] <= 10:
+        #     typ[1] = typ[1] + 1
+        #     result.loc[row_id, ('type2', 'type3')] = np.nan
+        #     result.loc[row_id, ('t2 score', 't3 score')] = 0
+        # elif row['t3 score'] <= 10:
+        #     typ[2] = typ[2] + 1
+        #     result.loc[row_id, 'type3'] = np.nan
+        #     result.loc[row_id, 't3 score'] = 0
+        # else:
+        #     typ[3] = typ[3] + 1
 
         subject = row['subject1']
         if subject is not np.nan and str(subject) != 'nan':
@@ -398,7 +398,7 @@ def remove_low_scores_and_save_subtyps():
 
     print 'sub', sub
     print 'typ', typ
-    result.to_csv('result_filtered.csv', sep=';')
+    # result.to_csv('result_filtered.csv', sep=';')
 
     types.to_csv("types-result.csv", sep=';', doublequote=True)
     subjs.to_csv("subjs-result.csv", sep=';', doublequote=True)
@@ -407,5 +407,5 @@ def remove_low_scores_and_save_subtyps():
 # combine()
 # shared_opinion()
 # remove_low_scores_and_save_subtyps()
-read_files()
-eval_subjects()
+# read_files()
+# eval_subjects()
