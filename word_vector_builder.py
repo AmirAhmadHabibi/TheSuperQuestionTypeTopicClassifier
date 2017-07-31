@@ -42,16 +42,20 @@ def count_words():
                                      ignore_index=True)
             else:
                 words.loc[words['term'] == word, 'num'] = words.loc[words['term'] == word, 'num'] + 1
+
+    # sort by frequency number
+    words = words.sort_values(by='num', ascending=False)
+    words = words.reset_index(drop=True)
     return words
 
 
-def save_vector():
+def save_1000word_vector():
     # count and write to file
-    # words = count_words()
-    # words.to_csv('words_with_count.csv', sep=';', index=False)
+    words = count_words()
+    words.to_csv('words_with_count.csv', sep=';', index=False)
 
     # pick the first 1000
-    words = pd.read_csv('words_with_count.csv', delimiter=';')
+    # words = pd.read_csv('words_with_count.csv', delimiter=';')
     stop_words = pd.read_csv('PersianStopWordList.txt', delimiter=';', header=None)
     words = words.dropna(subset={'term'})
     # remove the stop words
@@ -86,4 +90,5 @@ def replace_bad_characters():
     items.to_csv('result_filtered.csv', sep=';', index=False)
 
 
-save_vector()
+save_1000word_vector()
+# replace_bad_characters()

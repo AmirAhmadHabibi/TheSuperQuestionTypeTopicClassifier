@@ -52,9 +52,6 @@ def build_train_data_for_types():
     qvectors = pd.read_csv('vector1000.csv')
     types = pd.read_csv('./1_combine_tags/types-result.csv', delimiter=';')
 
-    qvectors = qvectors.drop(
-        {'a0', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8', 'a9', 'a10', 'a11', 'a12', 'a13', 'a14', 'a15', 'a16',
-         'a17', 'a18', 'a19', 'a20', 'a21', 'a22', 'a23'},axis=1)
     # creating dataframe
     train = pd.DataFrame(dtype=object)
     for i, typ in types.iterrows():
@@ -130,8 +127,38 @@ def concat_word2vec_types():
     result.to_csv('type-word2vec.csv', index=False)
 
 
+def create_1000word_vector():
+    questions = pd.read_csv('result_filtered.csv', delimiter=';')
+    words_vector = pd.read_csv('words_vector.csv')
+    # create dataframe
+    train = pd.DataFrame(dtype=object)
+    for word in words_vector['term'].as_matrix():
+        train[word] = 0
+    # remove questions without subjects
+    for i, qrow in questions.iterrows():
+        if str(qrow['subject1']) == 'nan' or qrow['subject1'] == numpy.nan:
+            questions = questions[questions['id'] != qrow['id']]
+    # build the train data
+    for i, qrow in questions.iterrows():
+        sys.stdout.write('\r' + 'processed question ' + str(i))
+        # set occurrence values
+        for word in words_vector['term'].as_matrix():
+            if word in qrow['sentence']:
+                train.loc[i, word] = 1
+            else:
+                train.loc[i, word] = 0
+    # rename columns
+    number = 0
+    for col in train:
+        train = train.rename(columns={col: 'wrd' + str(number)})
+        number += 1
+
+    train.to_csv('1000word_vector_Q.csv', index=False)
+
 # build_train_data_for_subjs()
-create_arff_header()
+# create_arff_header()
 # concat_word2vec_subjs()
 # build_train_data_for_types()
 # concat_word2vec_types()
+# concat_1000vec_type_cat()
+create_1000word_vector()
