@@ -142,23 +142,37 @@ def concat_1000vec_type_cat():
     wrd = pd.read_csv('1000word_vector_Q.csv')
     subj = pd.read_csv('subject_vector_Q.csv')
     type = pd.read_csv('type_vector_Q.csv')
-    result = pd.concat([type, subj, wrd], axis=1)
-    result.to_csv('type-subj-wrd_Q.csv', index=False)
+    # result = pd.concat([type, subj, wrd], axis=1)
+    # result = pd.concat([type, wrd], axis=1)
+    result = pd.concat([subj, wrd], axis=1)
+    result.to_csv('8_subj;wrd.csv', index=False)
+
+
+def concat_word2vec2_type_cat():
+    w2v = pd.read_csv('Word2vecData2.txt',header=None)
+    subj = pd.read_csv('subject_vector_Q.csv')
+    type = pd.read_csv('type_vector_Q.csv')
+
+    # result = pd.concat([subj, w2v], axis=1)
+    # result.to_csv('9_subj;w2v_2.arff', index=False)
+
+    result = pd.concat([type, w2v], axis=1)
+    result.to_csv('10_type;w2v_2.arff', index=False)
 
 
 def create_arff_header():
     header = '@relation \'CQA\'\n\n'
     for i in range(0, 12):
-        header += '@attribute typ' + str(i) + ' numeric\n'
-    for i in range(0, 24):
-        header += '@attribute sub' + str(i) + ' {0,1}\n'
-    for i in range(0, 1000):
+        header += '@attribute typ' + str(i) + ' {0,1}\n'
+    # for i in range(0, 24):
+    #     header += '@attribute sub' + str(i) + ' {0,1}\n'
+    for i in range(0, 100):
         header += '@attribute wrd' + str(i) + ' numeric\n'
     header += '\n@data\n'
     print header
 
 
-# create_arff_header()
+create_arff_header()
 # concat_word2vec_subjs()
 # concat_word2vec_types()
 
@@ -166,3 +180,5 @@ def create_arff_header():
 # create_type_vector()
 # create_subject_vector()
 # concat_1000vec_type_cat()
+concat_word2vec2_type_cat()
+
