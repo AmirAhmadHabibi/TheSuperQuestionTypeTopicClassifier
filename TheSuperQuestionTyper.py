@@ -56,31 +56,6 @@ def read_files():
     data17.loc[2568:2799, ('subject_notsure', 'type_notsure')] = 0
 
 
-def eval_subjects():
-    print 'not sure subjects for 16 : ' + str(data16['subject_notsure'].value_counts()[1])
-    print 'suggested subjects for 16 : ' + str(data16[~data16['suggested_subject'].isnull()].shape[0])
-    print 'no label and Suggestion for 16 : ' + str(
-        data16[(data16['suggested_subject'].isnull()) & (data16['subject1'].isnull())].shape[0])
-    print '1 label 16 : ' + str(data16[(data16['subject2'].isnull()) & (~data16['subject1'].isnull())].shape[0])
-    print '2 label 16 : ' + str(data16[data16['subject3'].isnull() & ~data16['subject2'].isnull()].shape[0])
-    print '3 label 16 : ' + str(data16[~data16['subject3'].isnull()].shape[0])
-
-    print 'not sure subjects for 17 : ' + str(data17['subject_notsure'].value_counts()[1])
-    print 'suggested subjects for 17 : ' + str(data17[~data17['suggested_subject'].isnull()].shape[0])
-    print 'no label and Suggestion for 17 : ' + str(
-        data17[data17['suggested_subject'].isnull() & data17['subject1'].isnull()].shape[0])
-    print '1 label 17 : ' + str(data17[data17['subject2'].isnull() & ~data17['subject1'].isnull()].shape[0])
-    print '2 label 17 : ' + str(data17[data17['subject3'].isnull() & ~data17['subject2'].isnull()].shape[0])
-    print '3 label 17 : ' + str(data17[~data17['subject3'].isnull()].shape[0])
-
-    print 'not sure subjects for 18 : ' + str(data18['subject_notsure'].value_counts()[1])
-    print 'suggested subjects for 18 : ' + str(data18[~data18['suggested_subject'].isnull()].shape[0])
-    print 'no label and Suggestion for 18 : ' + str(
-        data18[data18['suggested_subject'].isnull() & data18['subject1'].isnull()].shape[0])
-    print '1 label 18 : ' + str(data18[data18['subject2'].isnull() & ~data18['subject1'].isnull()].shape[0])
-    print '2 label 18 : ' + str(data18[data18['subject3'].isnull() & ~data18['subject2'].isnull()].shape[0])
-    print '3 label 18 : ' + str(data18[~data18['subject3'].isnull()].shape[0])
-
 
 def eval_types():
     print 'not sure types for 16 : ' + str(data16['type_notsure'].value_counts()[1])

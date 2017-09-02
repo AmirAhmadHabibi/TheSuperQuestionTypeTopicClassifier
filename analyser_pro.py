@@ -68,10 +68,10 @@ def get_agreement(data1, data2):
             typ_num += 1
             avg_on_typ_agreement += typ_agreement
 
-        # agreements = agreements.append(
-        #     {'q id': i, 'subjects1': list(sub1), 'subjects2': list(sub2), 'sub agreement': sub_agreement,
-        #      'types1': list(typ1), 'types2': list(typ2), 'typ agreement': typ_agreement}, ignore_index=True)
-        # print agreements
+            # agreements = agreements.append(
+            #     {'q id': i, 'subjects1': list(sub1), 'subjects2': list(sub2), 'sub agreement': sub_agreement,
+            #      'types1': list(typ1), 'types2': list(typ2), 'typ agreement': typ_agreement}, ignore_index=True)
+            # print agreements
 
     avg_on_sub_agreement = avg_on_sub_agreement / sub_num
     avg_on_typ_agreement = avg_on_typ_agreement / typ_num
@@ -98,4 +98,37 @@ def get_agreement_of_all():
     # agreements17_18.to_csv('./1_combine_tags/agreement_17_18.csv', index=False)
 
 
-get_agreement_of_all()
+# get_agreement_of_all()
+##################################################################################################################
+
+def eval_category(cat):
+    data16 = pd.read_csv('./1_combine_tags/16-javaheri_e.csv', delimiter=';', index_col=['id'])
+    data17 = pd.read_csv('./1_combine_tags/17-sheikholeslami_e.csv', delimiter=';', index_col=['id'])
+    data18 = pd.read_csv('./1_combine_tags/18-sayahi_e.csv', delimiter=';', index_col=['id'])
+
+    print 'not sure ' + cat + 's for 16 : ' + str(data16[cat + '_notsure'].value_counts()[1])
+    print 'suggested ' + cat + 's for 16 : ' + str(data16[~data16['suggested_' + cat].isnull()].shape[0])
+    print 'no label and Suggestion for 16 : ' + str(
+        data16[(data16['suggested_' + cat].isnull()) & (data16[cat + '1'].isnull())].shape[0])
+    print '1 label 16 : ' + str(data16[(data16[cat + '2'].isnull()) & (~data16[cat + '1'].isnull())].shape[0])
+    print '2 label 16 : ' + str(data16[data16[cat + '3'].isnull() & ~data16[cat + '2'].isnull()].shape[0])
+    print '3 label 16 : ' + str(data16[~data16[cat + '3'].isnull()].shape[0])
+
+    print 'not sure ' + cat + 's for 17 : ' + str(0)
+    print 'suggested ' + cat + 's for 17 : ' + str(data17[~data17['suggested_' + cat].isnull()].shape[0])
+    print 'no label and Suggestion for 17 : ' + str(
+        data17[data17['suggested_' + cat].isnull() & data17[cat + '1'].isnull()].shape[0])
+    print '1 label 17 : ' + str(data17[data17[cat + '2'].isnull() & ~data17[cat + '1'].isnull()].shape[0])
+    print '2 label 17 : ' + str(data17[data17[cat + '3'].isnull() & ~data17[cat + '2'].isnull()].shape[0])
+    print '3 label 17 : ' + str(data17[~data17[cat + '3'].isnull()].shape[0])
+
+    print 'not sure ' + cat + 's for 18 : ' + str(data18[cat + '_notsure'].value_counts()[1])
+    print 'suggested ' + cat + 's for 18 : ' + str(data18[~data18['suggested_' + cat].isnull()].shape[0])
+    print 'no label and Suggestion for 18 : ' + str(
+        data18[data18['suggested_' + cat].isnull() & data18[cat + '1'].isnull()].shape[0])
+    print '1 label 18 : ' + str(data18[data18[cat + '2'].isnull() & ~data18[cat + '1'].isnull()].shape[0])
+    print '2 label 18 : ' + str(data18[data18[cat + '3'].isnull() & ~data18[cat + '2'].isnull()].shape[0])
+    print '3 label 18 : ' + str(data18[~data18[cat + '3'].isnull()].shape[0])
+
+
+eval_category(cat='type')
