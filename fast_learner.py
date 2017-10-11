@@ -5,10 +5,6 @@ from skmultilearn.problem_transform import BinaryRelevance
 from sklearn.svm import SVC
 import pickle
 
-words_vector = pd.read_csv('words_vector.csv')
-subjs = pd.read_csv('subjs-result.csv', delimiter=';')
-types = pd.read_csv('types-result.csv', delimiter=';')
-
 
 def learn_svm():
     wrd = pd.read_csv('1000word_vector_Q.csv')
@@ -29,7 +25,7 @@ def learn_svm():
     pickle.dump(type_classifier, typ_class_file)
     typ_class_file.close()
 
-    print 'Saved the pickles!'
+    print('Saved the pickles!')
 
 
 def tokenise(question):
@@ -40,12 +36,12 @@ def tokenise(question):
     question = question.replace('‌', ' ')
     question = question.replace('‏', ' ')
     for ch in [':', ';', ',', '?', '!', '\'', '\"', '\\', '/', '(', ')', '[', ']', '…', '...', '–', '-', '<', '>', '؟',
-               '،', '.', '­', '«', '»', '_', '+', '=', ]:
+               '،', '.', '­', '«', '»', '_', '+', '=']:
         question = question.replace(ch, ' ')
     return question.split()
 
 
-def predict_subject_type(subject_classifier, type_classifier, question):
+def question_word_vector(question, words_vector):
     question_vector = pd.DataFrame(dtype=object)
     for wrd in words_vector['term'].as_matrix():
         question_vector[wrd] = 0
@@ -56,35 +52,45 @@ def predict_subject_type(subject_classifier, type_classifier, question):
         if word in question_vector:
             question_vector.loc[0, word] = 1
     question_vector = question_vector.fillna(0)
+    return question_vector
 
-    # predict subject
-    prediction_probabilities = np.array(subject_classifier.predict_proba(question_vector).todense())[0]
-    prediction = pd.concat([subjs['tag'], pd.DataFrame(prediction_probabilities)], axis=1)
+
+def predict_subject_type(classifier, question_vector, labels):
+    # predict
+    prediction_probabilities = np.array(classifier.predict_proba(question_vector).todense())[0]
+    # add labels to probabilities
+    prediction = pd.concat([labels, pd.DataFrame(prediction_probabilities)], axis=1)
+    # sort by probability
     prediction = prediction.rename(columns={0: 'prob'})
     prediction = prediction.sort_values('prob', ascending=False)
     prediction = prediction.reset_index(drop=True)
-    print 'subject: '
-    print prediction[prediction['prob'] >= 0.1]
 
-    # predict type
-    prediction_probabilities = np.array(type_classifier.predict_proba(question_vector).todense())[0]
-    prediction = pd.concat([types['tag'], pd.DataFrame(prediction_probabilities)], axis=1)
-    prediction = prediction.rename(columns={0: 'prob'})
-    prediction = prediction.sort_values('prob', ascending=False)
-    prediction = prediction.reset_index(drop=True)
-    print 'type: '
-    print prediction[prediction['prob'] >= 0.1]
+    if not prediction[prediction['prob'] >= 0.1].empty:
+        return prediction[prediction['prob'] >= 0.1]
+    return prediction[0:3]
 
 
 def do_questions():
+    subjs = pd.read_csv('./1_combine_tags/subjs-result.csv', delimiter=';')
+    types = pd.read_csv('./1_combine_tags/types-result.csv', delimiter=';')
+    words_vector = pd.read_csv('words_vector.csv')
     # load the classifiers
     sub_class_file = open('sub_class_file.pkl', 'rb')
     subject_classifier = pickle.load(sub_class_file)
     typ_class_file = open('typ_class_file.pkl', 'rb')
     type_classifier = pickle.load(typ_class_file)
     # get a question and predict its subject
-    question = raw_input('Enter a question:')
-    predict_subject_type(subject_classifier, type_classifier, question)
+    while True:
+        question = raw_input('Enter a question:')
+        question_vector = question_word_vector(question, words_vector)
+
+        predictions = predict_subject_type(subject_classifier, question_vector, subjs['tag'])
+        print('subject: ')
+        print predictions
+
+        predictions = predict_subject_type(type_classifier, question_vector, types['tag'])
+        print('type: ')
+        print predictions
 
 
 # learn_svm()
