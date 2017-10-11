@@ -57,13 +57,13 @@ def predict_subject(subject_classifier, question):
     prediction = prediction.sort_values('prob', ascending=False)
     prediction = prediction.reset_index(drop=True)
 
-    print prediction
+    print prediction[prediction['prob'] >= 0.1]
 
 
 def go():
-    question=raw_input()
     sub_class_file = open('sub_class_file.pkl', 'rb')
     subject_classifier = pickle.load(sub_class_file)
+    question = raw_input('Enter a question:')
     predict_subject(subject_classifier, question)
 
 
