@@ -1,21 +1,71 @@
+# coding=utf-8
+import numpy as np
 import pandas as pd
 from skmultilearn.problem_transform import BinaryRelevance
 from sklearn.svm import SVC
+import pickle
 
-wrd = pd.read_csv('1000word_vector_Q.csv')
-sub = pd.read_csv('subject_vector_Q.csv')
-typ = pd.read_csv('type_vector_Q.csv')
+words_vector = pd.read_csv('words_vector.csv')
+subjs = pd.read_csv('subjs-result.csv', delimiter=';')
+# types = pd.read_csv('./1_combine_tags/types-result.csv', delimiter=';')
 
-# initialize Binary Relevance multi-label classifier
-# with an SVM classifier
-# SVM in scikit only supports the X matrix in sparse representation
 
-classifier = BinaryRelevance(classifier=SVC(probability=True), require_dense=[False, True])
+def learn_svm():
+    wrd = pd.read_csv('1000word_vector_Q.csv')
+    sub = pd.read_csv('subject_vector_Q.csv')
+    # typ = pd.read_csv('type_vector_Q.csv')
 
-# train
-classifier.fit(wrd[10:], sub[10:])
+    subject_classifier = BinaryRelevance(classifier=SVC(probability=True), require_dense=[False, True])
+    subject_classifier.fit(wrd, sub)
 
-print classifier.partition
+    sub_class_file = open('sub_class_file.pkl', 'wb')
+    pickle.dump(subject_classifier, sub_class_file)
+    sub_class_file.close()
 
-# predict
-print classifier.predict_proba(wrd[:1])
+
+def tokenise(question):
+    question = question.replace('ي', 'ی')
+    question = question.replace('ى', 'ی')
+    question = question.replace('ك', 'ک')
+    question = question.replace(' ', ' ')
+    question = question.replace('‌', ' ')
+    question = question.replace('‏', ' ')
+    for ch in [':', ';', ',', '?', '!', '\'', '\"', '\\', '/', '(', ')', '[', ']', '…', '...', '–', '-', '<', '>', '؟',
+               '،', '.', '­', '«', '»', '_', '+', '=', ]:
+        question = question.replace(ch, ' ')
+    return question.split()
+
+
+def predict_subject(subject_classifier, question):
+    question_vector = pd.DataFrame(dtype=object)
+    for wrd in words_vector['term'].as_matrix():
+        question_vector[wrd] = 0
+    # build the question_vector
+    question_vector.loc[0, words_vector['term'][0]] = 0
+    # set occurrence values
+    for word in tokenise(question):
+        if word in question_vector:
+            question_vector.loc[0, word] = 1
+
+    question_vector = question_vector.fillna(0)
+
+    # predict
+    prediction_probabilities = np.array(subject_classifier.predict_proba(question_vector).todense())[0]
+
+    prediction = pd.concat([subjs['tag'], pd.DataFrame(prediction_probabilities)], axis=1)
+    prediction = prediction.rename(columns={0: 'prob'})
+    prediction = prediction.sort_values('prob', ascending=False)
+    prediction = prediction.reset_index(drop=True)
+
+    print prediction
+
+
+def go():
+    question=raw_input()
+    sub_class_file = open('sub_class_file.pkl', 'rb')
+    subject_classifier = pickle.load(sub_class_file)
+    predict_subject(subject_classifier, question)
+
+
+# learn_svm()
+go()
