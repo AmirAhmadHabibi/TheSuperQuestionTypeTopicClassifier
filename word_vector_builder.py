@@ -11,42 +11,31 @@ def tokenise(qstn):
     return qstn.split()
 
 
-def get_word_list(qstn):
-    w_list = []
-    flag = 0
-    for word in tokenise(qstn):
-        for tpl in w_list:
-            if tpl[0] == word:
-                tpl[1] = tpl[1] + 1
-                flag = 1
-                break
-        if flag == 0:
-            w_list.append([word, 1])
-        flag = 0
-    return w_list
-
-
 def count_words():
     questions = pd.read_csv('result_filtered.csv', delimiter=';')
-    words = pd.DataFrame(columns=('term', 'num'))
+    questions_2 = pd.read_csv('./Porsak_data/qa_questions-refined.csv', delimiter=';')
+    # words = pd.DataFrame(columns=('term', 'num'))
+    words = dict()
 
     # iterate on questions
     for q_id, qstn in questions.iterrows():
-        if q_id % 100 == 0: print q_id  # printing progress
-        word_list = get_word_list(qstn['sentence'])
-
-        # iterate on words of each question
-        for word, f in word_list:
-            if words[words['term'] == word].empty:
-                words = words.append({'term': word, 'num': 1},
-                                     ignore_index=True)
+        for word in set(tokenise(qstn['sentence'])):
+            if word in words:
+                words[word] += 1
             else:
-                words.loc[words['term'] == word, 'num'] = words.loc[words['term'] == word, 'num'] + 1
-
+                words[word] = 1
+    # iterate on questions
+    for q_id, qstn in questions_2.iterrows():
+        for word in set(tokenise(str(qstn['content']) + ' ' + qstn['title'])):
+            if word in words:
+                words[word] += 1
+            else:
+                words[word] = 1
+    words_df = pd.DataFrame(words.items(), columns=['term', 'num'])
     # sort by frequency number
-    words = words.sort_values(by='num', ascending=False)
-    words = words.reset_index(drop=True)
-    return words
+    words_df = words_df.sort_values(by='num', ascending=False)
+    words_df = words_df.reset_index(drop=True)
+    return words_df
 
 
 def save_1000word_vector():
@@ -54,13 +43,15 @@ def save_1000word_vector():
     words = count_words()
     words.to_csv('words_with_count.csv', sep=';', index=False)
 
+    bad_words_list = {'font', 'family', '&nbsp', 'rgb', '14px', 'p', 'style', 'span', 'size'}
     # pick the first 1000
-    # words = pd.read_csv('words_with_count.csv', delimiter=';')
     stop_words = pd.read_csv('PersianStopWordList.txt', delimiter=';', header=None)
     words = words.dropna(subset={'term'})
     # remove the stop words
     for stop_word in stop_words.as_matrix():
         words = words[words.term != stop_word[0]]
+    for bad_word in bad_words_list:
+        words = words[words.term != bad_word]
     # remove numbers
     for i, word in words.iterrows():
         if word['term'].isdigit():
@@ -74,8 +65,9 @@ def save_1000word_vector():
     words.to_csv('words_vector.csv', sep=';', index=False)
 
 
-def replace_bad_characters():
-    items = pd.read_csv('result_filtered.csv', delimiter=';')
+def refine_questions():
+    # items = pd.read_csv('result_filtered.csv', delimiter=';')
+    items = pd.read_csv('./Porsak_data/qa_questions.csv', delimiter=';')
     for i, row in items.iterrows():
         term = items.loc[i, 'title']
         if str(term) == 'nan':
@@ -87,8 +79,21 @@ def replace_bad_characters():
         term = term.replace('‌', ' ')
         term = term.replace('‏', ' ')
         items.loc[i, 'title'] = term
-    items.to_csv('result_filtered.csv', sep=';', index=False)
+
+        term = items.loc[i, 'content']
+        if str(term) == 'nan':
+            continue
+        term = term.replace('ي', 'ی')
+        term = term.replace('ى', 'ی')
+        term = term.replace('ك', 'ک')
+        term = term.replace(' ', ' ')
+        term = term.replace('‌', ' ')
+        term = term.replace('‏', ' ')
+        items.loc[i, 'content'] = term
+    items = items[['topicid', 'topic', 'title', 'content']]
+    # items.to_csv('result_filtered.csv', sep=';', index=False)
+    items.to_csv('./Porsak_data/qa_questions-refined.csv', sep=';', index=False)
 
 
 save_1000word_vector()
-# replace_bad_characters()
+# refine_questions()
