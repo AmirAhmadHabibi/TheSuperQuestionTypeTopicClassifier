@@ -8,22 +8,22 @@ import pickle
 
 def learn_svm():
     wrd = pd.read_csv('1000word_vector_Q.csv')
-    sub = pd.read_csv('subject_vector_Q.csv')
-    typ = pd.read_csv('type_vector_Q.csv')
+    tpc = pd.read_csv('topic_vector_Q.csv')
+    # typ = pd.read_csv('type_vector_Q.csv')
 
     subject_classifier = BinaryRelevance(classifier=SVC(probability=True), require_dense=[False, True])
-    subject_classifier.fit(wrd, sub)
+    subject_classifier.fit(wrd, tpc)
 
-    sub_class_file = open('sub_class_file.pkl', 'wb')
+    sub_class_file = open('tpc_class_file.pkl', 'wb')
     pickle.dump(subject_classifier, sub_class_file)
     sub_class_file.close()
 
-    type_classifier = BinaryRelevance(classifier=SVC(probability=True), require_dense=[False, True])
-    type_classifier.fit(wrd, typ)
-
-    typ_class_file = open('typ_class_file.pkl', 'wb')
-    pickle.dump(type_classifier, typ_class_file)
-    typ_class_file.close()
+    # type_classifier = BinaryRelevance(classifier=SVC(probability=True), require_dense=[False, True])
+    # type_classifier.fit(wrd, typ)
+    #
+    # typ_class_file = open('typ_class_file.pkl', 'wb')
+    # pickle.dump(type_classifier, typ_class_file)
+    # typ_class_file.close()
 
     print('Saved the pickles!')
 
@@ -71,26 +71,26 @@ def predict_subject_type(classifier, question_vector, labels):
 
 
 def do_questions():
-    subjs = pd.read_csv('./1_combine_tags/subjs-result.csv', delimiter=';')
-    types = pd.read_csv('./1_combine_tags/types-result.csv', delimiter=';')
+    topics = pd.read_csv('./Porsak_data/topic_list.csv')
+    # types = pd.read_csv('./1_combine_tags/types-result.csv', delimiter=';')
     words_vector = pd.read_csv('words_vector.csv')
     # load the classifiers
-    sub_class_file = open('sub_class_file.pkl', 'rb')
-    subject_classifier = pickle.load(sub_class_file)
-    typ_class_file = open('typ_class_file.pkl', 'rb')
-    type_classifier = pickle.load(typ_class_file)
+    tpc_class_file = open('tpc_class_file.pkl', 'rb')
+    topic_classifier = pickle.load(tpc_class_file)
+    # typ_class_file = open('typ_class_file.pkl', 'rb')
+    # type_classifier = pickle.load(typ_class_file)
     # get a question and predict its subject
     while True:
         question = raw_input('Enter a question:')
         question_vector = question_word_vector(question, words_vector)
 
-        predictions = predict_subject_type(subject_classifier, question_vector, subjs['tag'])
-        print('subject: ')
+        predictions = predict_subject_type(topic_classifier, question_vector, topics['topic'])
+        print('topic: ')
         print predictions
 
-        predictions = predict_subject_type(type_classifier, question_vector, types['tag'])
-        print('type: ')
-        print predictions
+        # predictions = predict_subject_type(type_classifier, question_vector, types['tag'])
+        # print('type: ')
+        # print predictions
 
 
 # learn_svm()
