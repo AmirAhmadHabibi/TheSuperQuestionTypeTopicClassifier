@@ -60,8 +60,9 @@ def concat_word2vec_types():
 
 def create_1000word_vector():
     questions = pd.read_csv('result_filtered.csv', delimiter=';')
+    questions_2 = pd.read_csv('./Porsak_data/qa_questions-refined.csv', delimiter=';')
     words_vector = pd.read_csv('words_vector.csv')
-
+    first_rows = 2799
     # create dataframe
     train = pd.DataFrame(dtype=object)
     for wrd in words_vector['term'].as_matrix():
@@ -74,6 +75,14 @@ def create_1000word_vector():
         for word in tokenise(qrow['sentence']):
             if word in train:
                 train.loc[i, word] = 1
+
+    for i, qrow in questions_2.iterrows():
+        if i % 100 == 0: sys.stdout.write('\r' + 'processed question ' + str(i + first_rows))
+        train.loc[i + first_rows, words_vector['term'][0]] = 0
+        # set occurrence values
+        for word in tokenise(str(qrow['content']) + ' ' + qrow['title']):
+            if word in train:
+                train.loc[i + first_rows, word] = 1
 
     print train.shape
     train = train.fillna(0)
@@ -115,27 +124,37 @@ def create_type_vector():
 
 def create_subject_vector():
     questions = pd.read_csv('result_filtered.csv', delimiter=';')
-    subjs = pd.read_csv('./1_combine_tags/subjs-result.csv', delimiter=';')
-
+    questions_2 = pd.read_csv('./Porsak_data/qa_questions-refined.csv', delimiter=';')
+    topics = pd.read_csv('./Porsak_data/topic_list.csv')
+    first_rows = 2799
     # creating dataframe
     train = pd.DataFrame(dtype=object)
-    for i, sub in subjs.iterrows():
-        train['sub' + str(sub['id'])] = 0
+    for i, tpc in topics.iterrows():
+        train['tpc' + str(tpc['id'])] = 0
 
     # build the train data
     for i, qrow in questions.iterrows():
         if i % 100 == 0: sys.stdout.write('\r' + 'processed question ' + str(i))
-        # set occurrence of the subjects
-        for j, subj in subjs.iterrows():
-            sub_id = str(subj['id'])
-            train.loc[i, 'sub' + sub_id] = 0
-            if qrow['subject1'] == subj['tag'] or qrow['subject2'] == subj['tag'] or qrow['subject3'] == subj['tag']:
-                train.loc[i, 'sub' + sub_id] = 1
+        # set occurrence of the topics
+        for j, tpc in topics.iterrows():
+            train.loc[i, 'tpc' + str(tpc['id'])] = 0
+            if qrow['subject1'] == tpc['topic'] or qrow['subject2'] == tpc['topic'] or qrow['subject3'] == tpc['topic']:
+                train.loc[i, 'tpc' + str(tpc['id'])] = 1
+
+    # build the train data from second list of questions
+    for i, qrow in questions_2.iterrows():
+        if i % 100 == 0: sys.stdout.write('\r' + 'processed question ' + str(i))
+        # set occurrence of the topics
+        for j, tpc in topics.iterrows():
+            col_name = 'tpc' + str(tpc['id'])
+            train.loc[i + first_rows, col_name] = 0
+            if qrow['topic'] == tpc['topic']:
+                train.loc[i + first_rows, col_name] = 1
 
     for col in train:
         train[col] = train.apply(lambda row: int(row[col]), axis='columns')
 
-    train.to_csv('subject_vector_Q.csv', index=False)
+    train.to_csv('topic_vector_Q.csv', index=False)
 
 
 def concat_1000vec_type_cat():
@@ -144,12 +163,12 @@ def concat_1000vec_type_cat():
     type = pd.read_csv('type_vector_Q.csv')
     # result = pd.concat([type, subj, wrd], axis=1)
     # result = pd.concat([type, wrd], axis=1)
-    result = pd.concat([subj,type, wrd], axis=1)
+    result = pd.concat([subj, type, wrd], axis=1)
     result.to_csv('11_subj,typ;wrd.csv', index=False)
 
 
 def concat_word2vec2_type_cat():
-    w2v = pd.read_csv('Word2vecData2.txt',header=None)
+    w2v = pd.read_csv('Word2vecData2.txt', header=None)
     subj = pd.read_csv('subject_vector_Q.csv')
     type = pd.read_csv('type_vector_Q.csv')
 
@@ -172,13 +191,23 @@ def create_arff_header():
     print header
 
 
-create_arff_header()
+def save_topic_list():
+    topics = dict()
+    questions_2 = pd.read_csv('./Porsak_data/qa_questions-refined.csv', delimiter=';')
+    for i, qrow in questions_2.iterrows():
+        topics[qrow['topicid']] = qrow['topic']
+    df = pd.DataFrame(topics.items(), columns={'id', 'topic'})
+    df.to_csv('./Porsak_data/topic_list.csv', columns={'topic', 'id'}, index=False)
+
+
+# create_arff_header()
 # concat_word2vec_subjs()
 # concat_word2vec_types()
 
 # create_1000word_vector()
 # create_type_vector()
-# create_subject_vector()
+create_subject_vector()
 # concat_1000vec_type_cat()
 # concat_word2vec2_type_cat()
 
+# save_topic_list()
