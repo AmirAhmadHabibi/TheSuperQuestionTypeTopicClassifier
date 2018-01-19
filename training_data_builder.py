@@ -60,9 +60,10 @@ def concat_word2vec_types():
 
 def create_1000word_vector():
     questions = pd.read_csv('result_filtered.csv', delimiter=';')
-    questions_2 = pd.read_csv('./Porsak_data/qa_questions-refined.csv', delimiter=';')
+    # questions_2 = pd.read_csv('./Porsak_data/qa_questions-refined.csv', delimiter=';')
     words_vector = pd.read_csv('words_vector.csv')
-    first_rows = 2799
+    # first_rows = 2799
+
     # create dataframe
     train = pd.DataFrame(dtype=object)
     for wrd in words_vector['term'].as_matrix():
@@ -76,15 +77,15 @@ def create_1000word_vector():
             if word in train:
                 train.loc[i, word] = 1
 
-    for i, qrow in questions_2.iterrows():
-        if i % 100 == 0: sys.stdout.write('\r' + 'processed question ' + str(i + first_rows))
-        train.loc[i + first_rows, words_vector['term'][0]] = 0
-        # set occurrence values
-        for word in tokenise(str(qrow['content']) + ' ' + qrow['title']):
-            if word in train:
-                train.loc[i + first_rows, word] = 1
+    # for i, qrow in questions_2.iterrows():
+    #     if i % 100 == 0: sys.stdout.write('\r' + 'processed question ' + str(i + first_rows))
+    #     train.loc[i + first_rows, words_vector['term'][0]] = 0
+    #     # set occurrence values
+    #     for word in tokenise(str(qrow['content']) + ' ' + qrow['title']):
+    #         if word in train:
+    #             train.loc[i + first_rows, word] = 1
 
-    print train.shape
+    print (train.shape)
     train = train.fillna(0)
 
     # rename columns
@@ -93,7 +94,7 @@ def create_1000word_vector():
         train[col] = train.apply(lambda row: int(row[col]), axis='columns')
         train = train.rename(columns={col: 'wrd' + str(number)})
         number += 1
-    print train.shape
+    print (train.shape)
     train.to_csv('1000word_vector_Q.csv', index=False)
 
 
@@ -124,32 +125,43 @@ def create_type_vector():
 
 def create_subject_vector():
     questions = pd.read_csv('result_filtered.csv', delimiter=';')
-    questions_2 = pd.read_csv('./Porsak_data/qa_questions-refined.csv', delimiter=';')
+    # questions_2 = pd.read_csv('./Porsak_data/qa_questions-refined.csv', delimiter=';')
     topics = pd.read_csv('./Porsak_data/topic_list.csv')
-    first_rows = 2799
+    # first_rows = 2799
+
     # creating dataframe
+    topic_id = dict()
     train = pd.DataFrame(dtype=object)
     for i, tpc in topics.iterrows():
+        topic_id[tpc['topic']] = 'tpc' + str(tpc['id'])
         train['tpc' + str(tpc['id'])] = 0
 
     # build the train data
     for i, qrow in questions.iterrows():
         if i % 100 == 0: sys.stdout.write('\r' + 'processed question ' + str(i))
+
         # set occurrence of the topics
         for j, tpc in topics.iterrows():
             train.loc[i, 'tpc' + str(tpc['id'])] = 0
-            if qrow['subject1'] == tpc['topic'] or qrow['subject2'] == tpc['topic'] or qrow['subject3'] == tpc['topic']:
-                train.loc[i, 'tpc' + str(tpc['id'])] = 1
+
+        try:
+            train.loc[i, topic_id[qrow['subject1']]] = 1
+            train.loc[i, topic_id[qrow['subject2']]] = 1
+            train.loc[i, topic_id[qrow['subject3']]] = 1
+        except Exception as e:
+            if str(e) != 'nan':
+                print(e)
+
 
     # build the train data from second list of questions
-    for i, qrow in questions_2.iterrows():
-        if i % 100 == 0: sys.stdout.write('\r' + 'processed question ' + str(i))
-        # set occurrence of the topics
-        for j, tpc in topics.iterrows():
-            col_name = 'tpc' + str(tpc['id'])
-            train.loc[i + first_rows, col_name] = 0
-            if qrow['topic'] == tpc['topic']:
-                train.loc[i + first_rows, col_name] = 1
+    # for i, qrow in questions_2.iterrows():
+    #     if i % 100 == 0: sys.stdout.write('\r' + 'processed question ' + str(i))
+    #     # set occurrence of the topics
+    #     for j, tpc in topics.iterrows():
+    #         col_name = 'tpc' + str(tpc['id'])
+    #         train.loc[i + first_rows, col_name] = 0
+    #         if qrow['topic'] == tpc['topic']:
+    #             train.loc[i + first_rows, col_name] = 1
 
     for col in train:
         train[col] = train.apply(lambda row: int(row[col]), axis='columns')
@@ -188,7 +200,7 @@ def create_arff_header():
     for i in range(0, 1000):
         header += '@attribute wrd' + str(i) + ' numeric\n'
     header += '\n@data\n'
-    print header
+    print (header)
 
 
 def save_topic_list():
