@@ -3,9 +3,6 @@ import pandas as pd
 import numpy as np
 import sys
 
-reload(sys)
-sys.setdefaultencoding('utf-8')
-
 FIRST_SCORE = 10
 SECOND_SCORE = 9
 THIRD_SCORE = 8
@@ -58,12 +55,12 @@ def read_files():
 
 
 def eval_types():
-    print 'not sure types for 16 : ' + str(data16['type_notsure'].value_counts()[1])
-    print 'not sure types for 17 : ' + str(0)
-    print 'not sure types for 18 : ' + str(data18['type_notsure'].value_counts()[1])
-    print 'suggested types for 16 : ' + str(data16[~ data16['suggested_type'].isnull()].shape[0])
-    print 'suggested types for 17 : ' + str(data17[~ data17['suggested_type'].isnull()].shape[0])
-    print 'suggested types for 18 : ' + str(data18[~ data18['suggested_type'].isnull()].shape[0])
+    print('not sure types for 16 : ' + str(data16['type_notsure'].value_counts()[1]))
+    print('not sure types for 17 : ' + str(0))
+    print('not sure types for 18 : ' + str(data18['type_notsure'].value_counts()[1]))
+    print('suggested types for 16 : ' + str(data16[~ data16['suggested_type'].isnull()].shape[0]))
+    print('suggested types for 17 : ' + str(data17[~ data17['suggested_type'].isnull()].shape[0]))
+    print('suggested types for 18 : ' + str(data18[~ data18['suggested_type'].isnull()].shape[0]))
 
 
 def add_to_subjs(sub, col):
@@ -88,7 +85,7 @@ def add_to_types(sub, col):
 
 def eval_questions(result):
     for row_id, result_row in result.iterrows():  # for each question
-        if row_id % 100 == 0: print row_id
+        if row_id % 100 == 0: print(row_id)
         d16 = data16.loc[row_id]
         d17 = data17.loc[row_id]
         d18 = data18.loc[row_id]
@@ -129,9 +126,9 @@ def eval_questions(result):
                 result_row['s2 score'] = scores[sorted_scores[1]]
                 result_row['subject3'] = sorted_scores[2]
                 result_row['s3 score'] = scores[sorted_scores[2]]
-        except Exception, e:
+        except Exception as e:
             if str(e) != "list index out of range":
-                print e
+                print(e)
             pass
         try:
             if scores[sorted_scores[0]] > 10 and result_row['s1 score'] == result_row['s2 score']:
@@ -177,9 +174,9 @@ def eval_questions(result):
                 result_row['t2 score'] = scores[sorted_scores[1]]
                 result_row['type3'] = sorted_scores[2]
                 result_row['t3 score'] = scores[sorted_scores[2]]
-        except Exception, e:
+        except Exception as e:
             if str(e) != "list index out of range":
-                print e
+                print (e)
             pass
         try:
             if scores[sorted_scores[0]] > 10 and result_row['t1 score'] == result_row['t2 score']:
@@ -261,8 +258,8 @@ def combine():
 
     eval_questions(result)
 
-    print types
-    print subjs
+    print(types)
+    print(subjs)
 
     result.to_csv("result.csv", sep=';', doublequote=True)
     types.to_csv("types.csv", sep=';', doublequote=True)
@@ -274,7 +271,7 @@ def shared_opinion():
     # extract_suggestions()
     sug_sub = pd.read_csv('suggested_subjects.csv', delimiter=';')
     typ_sub = pd.read_csv('suggested_types.csv', delimiter=';')
-    print typ_sub
+    print(typ_sub)
 
     # # for i, row in sug_sub.iterrows():
     # #     occ_list = eval(row['occurrence_list'])
@@ -290,7 +287,7 @@ def shared_opinion():
             for occ1 in occ_list:
                 for occ2 in occ_list:
                     if occ1[0] != occ2[0] and occ1[1] == occ2[1]:
-                        print row['type'], occ1, occ2  # Shared opinion
+                        print(row['type'], occ1, occ2)  # Shared opinion
 
 
 def remove_low_scores_and_save_subtyps():
@@ -302,7 +299,7 @@ def remove_low_scores_and_save_subtyps():
     types = pd.DataFrame(columns=('tag', 'num'))
     subjs = pd.DataFrame(columns=('tag', 'num'))
     for row_id, row in result.iterrows():  # remove the ones with a score less than 11
-        if row_id % 100 == 0: print row_id
+        if row_id % 100 == 0: print(row_id)
 
         # if row['s1 score'] <= 10:
         #     sub[0] = sub[0] + 1
@@ -371,8 +368,8 @@ def remove_low_scores_and_save_subtyps():
                 types = types.append({'tag': type, 'num': 0}, ignore_index=True)
             types.loc[types['tag'] == type, 'num'] = types.loc[types['tag'] == type, 'num'] + 1
 
-    print 'sub', sub
-    print 'typ', typ
+    print ('sub', sub)
+    print ('typ', typ)
     # result.to_csv('result_filtered.csv', sep=';')
 
     types.to_csv("types-result.csv", sep=';', doublequote=True)

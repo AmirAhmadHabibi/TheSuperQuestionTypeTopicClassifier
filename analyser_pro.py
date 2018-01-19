@@ -3,8 +3,6 @@ import pandas as pd
 import numpy as np
 import sys
 
-reload(sys)
-sys.setdefaultencoding('utf-8')
 
 
 def cat_typ_correlation():
@@ -25,8 +23,8 @@ def cat_typ_correlation():
     corrlist = corrlist.sort('abs corr', ascending=False)
     corrlist.__delitem__('abs corr')
     corrlist = corrlist.reset_index(drop=True)
-    print corrlist.as_matrix()
-    print '-----------------'
+    print(corrlist.as_matrix())
+    print('-----------------')
 
 
 # cat_typ_correlation()
@@ -84,17 +82,17 @@ def get_agreement_of_all():
     data17 = pd.read_csv('./1_combine_tags/17-sheikholeslami_e.csv', delimiter=';', index_col=['id'])
     data18 = pd.read_csv('./1_combine_tags/18-sayahi_e.csv', delimiter=';', index_col=['id'])
 
-    print '           agreement on subjects  agreement on types'
+    print('           agreement on subjects  agreement on types')
     sub_agg, typ_agg, agreements16_17 = get_agreement(data16, data17)
-    print '16 - 17   ', sub_agg, '       ', typ_agg
+    print('16 - 17   ', sub_agg, '       ', typ_agg)
     # agreements16_17.to_csv('./1_combine_tags/agreement_16_17.csv', index=False)
 
     sub_agg, typ_agg, agreements16_18 = get_agreement(data16, data18)
-    print '16 - 18   ', sub_agg, '       ', typ_agg
+    print('16 - 18   ', sub_agg, '       ', typ_agg)
     # agreements16_18.to_csv('./1_combine_tags/agreement_16_18.csv', index=False)
 
     sub_agg, typ_agg, agreements17_18 = get_agreement(data17, data18)
-    print '17 - 18   ', sub_agg, '       ', typ_agg
+    print('17 - 18   ', sub_agg, '       ', typ_agg)
     # agreements17_18.to_csv('./1_combine_tags/agreement_17_18.csv', index=False)
 
 
@@ -106,29 +104,29 @@ def eval_category(cat):
     data17 = pd.read_csv('./1_combine_tags/17-sheikholeslami_e.csv', delimiter=';', index_col=['id'])
     data18 = pd.read_csv('./1_combine_tags/18-sayahi_e.csv', delimiter=';', index_col=['id'])
 
-    print 'not sure ' + cat + 's for 16 : ' + str(data16[cat + '_notsure'].value_counts()[1])
-    print 'suggested ' + cat + 's for 16 : ' + str(data16[~data16['suggested_' + cat].isnull()].shape[0])
-    print 'no label and Suggestion for 16 : ' + str(
-        data16[(data16['suggested_' + cat].isnull()) & (data16[cat + '1'].isnull())].shape[0])
-    print '1 label 16 : ' + str(data16[(data16[cat + '2'].isnull()) & (~data16[cat + '1'].isnull())].shape[0])
-    print '2 label 16 : ' + str(data16[data16[cat + '3'].isnull() & ~data16[cat + '2'].isnull()].shape[0])
-    print '3 label 16 : ' + str(data16[~data16[cat + '3'].isnull()].shape[0])
+    print('not sure ' + cat + 's for 16 : ' + str(data16[cat + '_notsure'].value_counts()[1]))
+    print('suggested ' + cat + 's for 16 : ' + str(data16[~data16['suggested_' + cat].isnull()].shape[0]))
+    print('no label and Suggestion for 16 : ' + str(
+        data16[(data16['suggested_' + cat].isnull()) & (data16[cat + '1'].isnull())].shape[0]))
+    print('1 label 16 : ' + str(data16[(data16[cat + '2'].isnull()) & (~data16[cat + '1'].isnull())].shape[0]))
+    print('2 label 16 : ' + str(data16[data16[cat + '3'].isnull() & ~data16[cat + '2'].isnull()].shape[0]))
+    print('3 label 16 : ' + str(data16[~data16[cat + '3'].isnull()].shape[0]))
 
-    print 'not sure ' + cat + 's for 17 : ' + str(0)
-    print 'suggested ' + cat + 's for 17 : ' + str(data17[~data17['suggested_' + cat].isnull()].shape[0])
-    print 'no label and Suggestion for 17 : ' + str(
-        data17[data17['suggested_' + cat].isnull() & data17[cat + '1'].isnull()].shape[0])
-    print '1 label 17 : ' + str(data17[data17[cat + '2'].isnull() & ~data17[cat + '1'].isnull()].shape[0])
-    print '2 label 17 : ' + str(data17[data17[cat + '3'].isnull() & ~data17[cat + '2'].isnull()].shape[0])
-    print '3 label 17 : ' + str(data17[~data17[cat + '3'].isnull()].shape[0])
+    print('not sure ' + cat + 's for 17 : ' + str(0))
+    print('suggested ' + cat + 's for 17 : ' + str(data17[~data17['suggested_' + cat].isnull()].shape[0]))
+    print('no label and Suggestion for 17 : ' + str(
+        data17[data17['suggested_' + cat].isnull() & data17[cat + '1'].isnull()].shape[0]))
+    print('1 label 17 : ' + str(data17[data17[cat + '2'].isnull() & ~data17[cat + '1'].isnull()].shape[0]))
+    print('2 label 17 : ' + str(data17[data17[cat + '3'].isnull() & ~data17[cat + '2'].isnull()].shape[0]))
+    print('3 label 17 : ' + str(data17[~data17[cat + '3'].isnull()].shape[0]))
 
-    print 'not sure ' + cat + 's for 18 : ' + str(data18[cat + '_notsure'].value_counts()[1])
-    print 'suggested ' + cat + 's for 18 : ' + str(data18[~data18['suggested_' + cat].isnull()].shape[0])
-    print 'no label and Suggestion for 18 : ' + str(
-        data18[data18['suggested_' + cat].isnull() & data18[cat + '1'].isnull()].shape[0])
-    print '1 label 18 : ' + str(data18[data18[cat + '2'].isnull() & ~data18[cat + '1'].isnull()].shape[0])
-    print '2 label 18 : ' + str(data18[data18[cat + '3'].isnull() & ~data18[cat + '2'].isnull()].shape[0])
-    print '3 label 18 : ' + str(data18[~data18[cat + '3'].isnull()].shape[0])
+    print('not sure ' + cat + 's for 18 : ' + str(data18[cat + '_notsure'].value_counts()[1]))
+    print('suggested ' + cat + 's for 18 : ' + str(data18[~data18['suggested_' + cat].isnull()].shape[0]))
+    print('no label and Suggestion for 18 : ' + str(
+        data18[data18['suggested_' + cat].isnull() & data18[cat + '1'].isnull()].shape[0]))
+    print('1 label 18 : ' + str(data18[data18[cat + '2'].isnull() & ~data18[cat + '1'].isnull()].shape[0]))
+    print('2 label 18 : ' + str(data18[data18[cat + '3'].isnull() & ~data18[cat + '2'].isnull()].shape[0]))
+    print('3 label 18 : ' + str(data18[~data18[cat + '3'].isnull()].shape[0]))
 
 
 eval_category(cat='type')

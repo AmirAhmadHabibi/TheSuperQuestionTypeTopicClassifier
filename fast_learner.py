@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 from skmultilearn.problem_transform import BinaryRelevance
+import sys
 from sklearn.svm import SVC
 import pickle
 
@@ -11,12 +12,17 @@ def learn_svm():
     tpc = pd.read_csv('topic_vector_Q.csv')
     # typ = pd.read_csv('type_vector_Q.csv')
 
+    # print(wrd)
+    # print(tpc)
+    # for col in tpc:
+    #     print(col, np.unique(tpc[col]))
+    tpc.drop('tpc41', axis=1, inplace=True)
+    tpc.drop('tpc42', axis=1, inplace=True)
     subject_classifier = BinaryRelevance(classifier=SVC(probability=True), require_dense=[False, True])
     subject_classifier.fit(wrd, tpc)
 
-    sub_class_file = open('tpc_class_file.pkl', 'wb')
-    pickle.dump(subject_classifier, sub_class_file)
-    sub_class_file.close()
+    with open('tpc_class_file.pkl', 'wb') as sub_class_file:
+        pickle.dump(subject_classifier, sub_class_file)
 
     # type_classifier = BinaryRelevance(classifier=SVC(probability=True), require_dense=[False, True])
     # type_classifier.fit(wrd, typ)
@@ -65,9 +71,9 @@ def predict_subject_type(classifier, question_vector, labels):
     prediction = prediction.sort_values('prob', ascending=False)
     prediction = prediction.reset_index(drop=True)
 
-    if not prediction[prediction['prob'] >= 0.1].empty:
-        return prediction[prediction['prob'] >= 0.1]
-    return prediction[0:3]
+    # if not prediction[prediction['prob'] >= 0.1].empty:
+    #     return prediction[prediction['prob'] >= 0.1]
+    return prediction[0:5]
 
 
 def do_questions():
@@ -75,23 +81,57 @@ def do_questions():
     # types = pd.read_csv('./1_combine_tags/types-result.csv', delimiter=';')
     words_vector = pd.read_csv('words_vector.csv')
     # load the classifiers
-    tpc_class_file = open('tpc_class_file.pkl', 'rb')
-    topic_classifier = pickle.load(tpc_class_file)
+    with open('tpc_class_file.pkl', 'rb') as tpc_class_file:
+        topic_classifier = pickle.load(tpc_class_file)
     # typ_class_file = open('typ_class_file.pkl', 'rb')
     # type_classifier = pickle.load(typ_class_file)
     # get a question and predict its subject
     while True:
-        question = raw_input('Enter a question:')
+        question = input('Enter a question:')
         question_vector = question_word_vector(question, words_vector)
 
         predictions = predict_subject_type(topic_classifier, question_vector, topics['topic'])
         print('topic: ')
-        print predictions
+        print(predictions)
 
         # predictions = predict_subject_type(type_classifier, question_vector, types['tag'])
         # print('type: ')
         # print predictions
 
 
+def eval_porsak_questions():
+    topics = pd.read_csv('./Porsak_data/topic_list.csv')
+    words_vector = pd.read_csv('words_vector.csv')
+
+    with open('tpc_class_file.pkl', 'rb') as tpc_class_file:
+        topic_classifier = pickle.load(tpc_class_file)
+
+    questions = pd.read_csv('./Porsak_data/qa_questions-refined.csv', delimiter=';')
+
+    total = 0
+    TP = 0
+    TP_5 = 0
+    for i, qrow in questions.iterrows():
+        if i % 10 == 0: sys.stdout.write('\r' + 'processed question ' + str(i))
+        try:
+            question_vector = question_word_vector(qrow['content'], words_vector)
+            predictions = predict_subject_type(topic_classifier, question_vector, topics['topic'])
+
+            total += 1
+            if qrow['topic'] == predictions['topic'][0]:
+                TP += 1
+            for p in predictions['topic']:
+                if qrow['topic'] == p:
+                    TP_5 += 1
+                    break
+        except Exception as e:
+            print('\n', e)
+            print('--', qrow['content'], qrow)
+
+    print('res: ', TP, total, TP / total)
+    print('res3: ', TP_5, total, TP_5 / total)
+
+
 # learn_svm()
-do_questions()
+eval_porsak_questions()
+# do_questions()
