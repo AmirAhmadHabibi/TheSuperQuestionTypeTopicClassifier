@@ -71,8 +71,8 @@ def predict_subject_type(classifier, question_vector, labels):
     prediction = prediction.sort_values('prob', ascending=False)
     prediction = prediction.reset_index(drop=True)
 
-    # if not prediction[prediction['prob'] >= 0.1].empty:
-    #     return prediction[prediction['prob'] >= 0.1]
+    if not prediction[prediction['prob'] >= 0.1].empty:
+        return prediction[prediction['prob'] >= 0.1]
     return prediction[0:5]
 
 
@@ -133,5 +133,5 @@ def eval_porsak_questions():
 
 
 # learn_svm()
-eval_porsak_questions()
-# do_questions()
+# eval_porsak_questions()
+do_questions()
