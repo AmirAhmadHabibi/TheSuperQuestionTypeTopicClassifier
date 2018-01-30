@@ -8,6 +8,18 @@ from nltk import pos_tag, word_tokenize
 from nltk.stem import WordNetLemmatizer
 
 
+class Progresser:
+    def __init__(self, total_num):
+        self.total = total_num
+        self.start_time = time.time()
+
+    def show_progress(self, current_num):
+        elapsed_time = time.time() - self.start_time
+        retime = (self.total - current_num - 1) * elapsed_time / (current_num + 1)
+        so.write('\rprocessed %' + str(round(100 * (current_num + 1) / self.total, 2))
+                 + '\ttime: ' + str(int(elapsed_time)) + ' | ' + str(int(retime)))
+
+
 def reformat(text):
     text = text.replace(' lt ', '<')
     text = text.replace(' gt ', '>')
@@ -96,17 +108,13 @@ def find_frequent_words():
     #         w, _, f = line.partition(',')
     #         words[w] = int(f)
 
-    start_time = time.time()
-    total_num = data.shape[0]
+    p = Progresser(data.shape[0])
     cleaner = re.compile('^\s*-*|-\s*$')
 
     for i, row in data.iterrows():
         # if i <= 50000:
         #     continue
-        elapsed_time = time.time() - start_time
-        retime = (total_num - i - 1) * elapsed_time / (i + 1)
-        so.write('\rprocessed %' + str(round(100 * (i + 1) / total_num, 2))
-                 + '\ttime: ' + str(int(elapsed_time)) + ' | ' + str(int(retime)))
+        p.show_progress(i)
 
         tokens_pos = pos_tag(word_tokenize(row['body']))
         for word_pos in tokens_pos:
@@ -173,15 +181,11 @@ def build_word_vectors():
         train[wrd] = 0
 
     cleaner = re.compile('^\s*-*|-\s*$')
-    total_num = data.shape[0]
-    start_time = time.time()
+    p = Progresser(data.shape[0])
     # build the train data
     for i, qrow in data.iterrows():
         i = qrow['id']
-        elapsed_time = time.time() - start_time
-        retime = (total_num - i - 1) * elapsed_time / (i + 1)
-        so.write('\rprocessed %' + str(round(100 * (i + 1) / total_num, 2))
-                 + '\ttime: ' + str(int(elapsed_time)) + ' | ' + str(int(retime)))
+        p.show_progress(i)
 
         train.loc[i, words_vector['term'][0]] = 0
 
@@ -219,16 +223,12 @@ def build_tag_vectors():
     for i, tpc in topics.iterrows():
         train[tpc['term']] = 0
 
-    total_num = data.shape[0]
-    start_time = time.time()
+    p = Progresser(data.shape[0])
     # build the train data
     for i, qrow in data.iterrows():
         i = qrow['id']
 
-        elapsed_time = time.time() - start_time
-        retime = (total_num - i - 1) * elapsed_time / (i + 1)
-        so.write('\rprocessed %' + str(round(100 * (i + 1) / total_num, 2))
-                 + '\ttime: ' + str(int(elapsed_time)) + ' | ' + str(int(retime)))
+        p.show_progress(i)
 
         # set occurrence of the topics
         for j, tpc in topics.iterrows():
