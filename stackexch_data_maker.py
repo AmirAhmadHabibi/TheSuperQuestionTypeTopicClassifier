@@ -147,10 +147,25 @@ def find_frequent_words():
             outfile.write(str(word) + '\n')
 
 
+def find_all_tags():
+    data = pd.read_csv('./StackExchange_data/all_data.csv')
+    tags = set()
+    for i, row in data.iterrows():
+        try:
+            tags = tags | eval(row['tag'])
+        except Exception as e:
+            print(e)
+            print('--', row['id'], row['tag'])
+
+    with open('./StackExchange_data/tags.csv', 'w') as outfile:
+        for tag in tags:
+            outfile.write(tag + '\n')
+
+
 def build_word_vectors():
     data = pd.read_csv('./StackExchange_data/all_data.csv')
-    lemmatiser = WordNetLemmatizer()
     words_vector = pd.read_csv('./StackExchange_data/1000words.csv', header=None, names={'term'})
+    lemmatiser = WordNetLemmatizer()
 
     # create dataframe
     train = pd.DataFrame(dtype=object)
@@ -162,6 +177,7 @@ def build_word_vectors():
     start_time = time.time()
     # build the train data
     for i, qrow in data.iterrows():
+        i = qrow['id']
         elapsed_time = time.time() - start_time
         retime = (total_num - i - 1) * elapsed_time / (i + 1)
         so.write('\rprocessed %' + str(round(100 * (i + 1) / total_num, 2))
@@ -178,6 +194,9 @@ def build_word_vectors():
             if word in train:
                 train.loc[i, word] = 1
 
+        if i % 5000 == 0:
+            train.to_csv('./StackExchange_data/data_1000word' + str(i) + '.csv', index=False)
+
     print(train.shape)
     train = train.fillna(0)
 
@@ -191,22 +210,43 @@ def build_word_vectors():
     train.to_csv('./StackExchange_data/data_1000word.csv', index=False)
 
 
-def find_all_tags():
+def build_tag_vectors():
     data = pd.read_csv('./StackExchange_data/all_data.csv')
-    tags = set()
-    for i, row in data.iterrows():
-        try:
-            tags = tags | eval(row['tag'])
-        except Exception as e:
-            print(e)
-            print('--', row['id'], row['tag'])
+    topics = pd.read_csv('./StackExchange_data/tags.csv', header=None, names={'term'})
 
-    with open('./StackExchange_data/tags.csv', 'w') as outfile:
-        for tag in tags:
-            outfile.write(tag + '\n')
+    # creating dataframe
+    train = pd.DataFrame(dtype=object)
+    for i, tpc in topics.iterrows():
+        train[tpc['term']] = 0
+
+    total_num = data.shape[0]
+    start_time = time.time()
+    # build the train data
+    for i, qrow in data.iterrows():
+        i = qrow['id']
+
+        elapsed_time = time.time() - start_time
+        retime = (total_num - i - 1) * elapsed_time / (i + 1)
+        so.write('\rprocessed %' + str(round(100 * (i + 1) / total_num, 2))
+                 + '\ttime: ' + str(int(elapsed_time)) + ' | ' + str(int(retime)))
+
+        # set occurrence of the topics
+        for j, tpc in topics.iterrows():
+            train.loc[i, tpc['term']] = 0
+        for tp in eval(qrow['tag']):
+            try:
+                train.loc[i, tp] = 1
+            except Exception as e:
+                print(e)
+
+    for col in train:
+        train[col] = train.apply(lambda row: int(row[col]), axis='columns')
+
+    train.to_csv('./StackExchange_data/data_topics.csv', index=False)
 
 
 # combine_all()
 # find_frequent_words()
 # find_all_tags()
-build_word_vectors()
+# build_word_vectors()
+build_tag_vectors()
