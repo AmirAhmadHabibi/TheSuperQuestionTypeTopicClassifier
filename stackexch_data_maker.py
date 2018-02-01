@@ -14,10 +14,15 @@ class Progresser:
         self.start_time = time.time()
 
     def show_progress(self, current_num):
-        elapsed_time = time.time() - self.start_time
-        retime = (self.total - current_num - 1) * elapsed_time / (current_num + 1)
-        so.write('\rprocessed %' + str(round(100 * (current_num + 1) / self.total, 2))
-                 + '\ttime: ' + str(int(elapsed_time)) + ' | ' + str(int(retime)))
+        if current_num % 10 == 0:
+            eltime = time.time() - self.start_time
+            retime = (self.total - current_num - 1) * eltime / (current_num + 1)
+
+            el_str = str(int(eltime / 3600)) + ':' + str(int((eltime % 3600) / 60)) + ':' + str(int(eltime % 60))
+            re_str = str(int(retime / 3600)) + ':' + str(int((retime % 3600) / 60)) + ':' + str(int(retime % 60))
+
+            so.write('\rprocessed %' + str(round(100 * (current_num + 1) / self.total, 2))
+                     + '\ttime: ' + el_str + ' | ' + re_str)
 
 
 def reformat(text):
@@ -56,7 +61,7 @@ def combine_all():
         row['id'] = id_num
         id_num += 1
 
-    data.set_index('id')
+    data = data.set_index(data['id'])
     bad_rows = set()
     html_cleaner = re.compile('<.*?>')
     for i, row in data.iterrows():
@@ -157,17 +162,27 @@ def find_frequent_words():
 
 def find_all_tags():
     data = pd.read_csv('./StackExchange_data/all_data.csv')
-    tags = set()
+    tags = dict()
     for i, row in data.iterrows():
-        try:
-            tags = tags | eval(row['tag'])
-        except Exception as e:
-            print(e)
-            print('--', row['id'], row['tag'])
+        for tag in eval(row['tag']):
+            if tag in tags:
+                tags[tag] += 1
+            else:
+                tags[tag] = 1
 
+    bad_keys = set()
+    for tag, f in tags.items():
+        if f == 1 or tag == '':
+            bad_keys.add(tag)
+
+    for bad in bad_keys:
+        del tags[bad]
+
+    sorted_tags = sorted(tags, key=lambda x: tags[x], reverse=True)
     with open('./StackExchange_data/tags.csv', 'w') as outfile:
-        for tag in tags:
-            outfile.write(tag + '\n')
+        outfile.write('term,freq')
+        for tag in sorted_tags:
+            outfile.write(tag + ',' + str(tags[tag]) + '\n')
 
 
 def build_word_vectors():
@@ -175,6 +190,7 @@ def build_word_vectors():
     words_vector = pd.read_csv('./StackExchange_data/1000words.csv', header=None, names={'term'})
     lemmatiser = WordNetLemmatizer()
 
+    data = data.set_index('id')
     # create dataframe
     train = pd.DataFrame(dtype=object)
     for wrd in words_vector['term'].as_matrix():
@@ -184,7 +200,6 @@ def build_word_vectors():
     p = Progresser(data.shape[0])
     # build the train data
     for i, qrow in data.iterrows():
-        i = qrow['id']
         p.show_progress(i)
 
         train.loc[i, words_vector['term'][0]] = 0
@@ -216,33 +231,51 @@ def build_word_vectors():
 
 def build_tag_vectors():
     data = pd.read_csv('./StackExchange_data/all_data.csv')
-    topics = pd.read_csv('./StackExchange_data/tags.csv', header=None, names={'term'})
+    topics = pd.read_csv('./StackExchange_data/tags.csv')
 
-    # creating dataframe
-    train = pd.DataFrame(dtype=object)
-    for i, tpc in topics.iterrows():
-        train[tpc['term']] = 0
+    cols_list = list(topics['term']) + ['id']
+    data = data.set_index('id')
+    train = pd.DataFrame(dtype=object, columns=cols_list)
 
     p = Progresser(data.shape[0])
     # build the train data
     for i, qrow in data.iterrows():
-        i = qrow['id']
-
         p.show_progress(i)
-
+        # if i <= 50000:
+        #     continue
+        train.loc[i, 'id'] = i
         # set occurrence of the topics
-        for j, tpc in topics.iterrows():
-            train.loc[i, tpc['term']] = 0
-        for tp in eval(qrow['tag']):
+        row_tags = eval(qrow['tag'])
+        for tp in row_tags:
             try:
                 train.loc[i, tp] = 1
             except Exception as e:
                 print(e)
+        if i % 2000 == 0:
+            train.to_csv('./StackExchange_data/data_tags' + str(int(i / 2000)) + '.csv', index=False)
+            train = pd.DataFrame(dtype=object, columns=cols_list)
+    print('\n--')
 
-    for col in train:
-        train[col] = train.apply(lambda row: int(row[col]), axis='columns')
+    # concat all data
+    train_all = pd.DataFrame(dtype=object, columns=list(topics['term']))
+    for i in range(0, 26):
+        try:
+            train_temp = pd.read_csv('./StackExchange_data/data_tags' + str(i) + '.csv')
+            train_temp = train_temp[cols_list]
+            train_temp = train_temp.fillna(0)
+            train_all = pd.concat([train_all, train_temp], axis=0)
+            print(i, 'done!')
+        except Exception as e:
+            print(e)
 
-    train.to_csv('./StackExchange_data/data_topics.csv', index=False)
+    train = train.fillna(0)
+    train = train[cols_list]
+    train_all = pd.concat([train_all, train], axis=0)
+    print('last one done!')
+
+    train_all = train_all[cols_list]
+
+    train_all.to_csv('./StackExchange_data/data_tags.csv', index=False, float_format='%.f', columns=cols_list)
 
 
 # combine_all()
