@@ -191,10 +191,9 @@ def build_word_vectors():
     lemmatiser = WordNetLemmatizer()
 
     data = data.set_index('id')
-    # create dataframe
-    train = pd.DataFrame(dtype=object)
-    for wrd in words_vector['term'].as_matrix():
-        train[wrd] = 0
+    # create DataFrame
+    cols_list = list(words_vector['term']) + ['question_id']
+    train = pd.DataFrame(dtype=object, columns=cols_list)
 
     cleaner = re.compile('^\s*-*|-\s*$')
     p = Progresser(data.shape[0])
@@ -202,7 +201,7 @@ def build_word_vectors():
     for i, qrow in data.iterrows():
         p.show_progress(i)
 
-        train.loc[i, words_vector['term'][0]] = 0
+        train.loc[i, 'question_id'] = i
 
         # set occurrence values
         tokens_pos = pos_tag(word_tokenize(qrow['body']))
@@ -213,20 +212,19 @@ def build_word_vectors():
             if word in train:
                 train.loc[i, word] = 1
 
+        # making backups
         if i % 5000 == 0:
             train.to_csv('./StackExchange_data/data_1000word' + str(i) + '.csv', index=False)
 
-    print(train.shape)
     train = train.fillna(0)
 
     # rename columns
     number = 0
     for col in train:
-        train[col] = train.apply(lambda row: int(row[col]), axis='columns')
         train = train.rename(columns={col: 'wrd' + str(number)})
         number += 1
-    print(train.shape)
-    train.to_csv('./StackExchange_data/data_1000word.csv', index=False)
+
+    train.to_csv('./StackExchange_data/data_1000word.csv', index=False, float_format='%.f')
 
 
 def build_tag_vectors():
@@ -271,7 +269,7 @@ def build_tag_vectors():
     train = train.fillna(0)
     train = train[cols_list]
     train_all = pd.concat([train_all, train], axis=0)
-    print('last one done!')
+    print('The last one done!')
 
     train_all = train_all[cols_list]
 
@@ -281,5 +279,5 @@ def build_tag_vectors():
 # combine_all()
 # find_frequent_words()
 # find_all_tags()
-# build_word_vectors()
-build_tag_vectors()
+build_word_vectors()
+# build_tag_vectors()
