@@ -2,7 +2,7 @@
 import numpy as np
 import pandas as pd
 from sklearn.metrics import hamming_loss
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import KFold
 from skmultilearn.problem_transform import BinaryRelevance
 import sys
 from sklearn.svm import SVC
@@ -31,13 +31,13 @@ def learn_svm():
     wrd = wrd[wrd_cols_list]
     print('read')
 
-    subject_classifier = BinaryRelevance(classifier=SVC(probability=True), require_dense=[False, False])
-    subject_classifier.fit(wrd, tpc)
+    topic_classifier = BinaryRelevance(classifier=SVC(probability=True), require_dense=[False, False])
+    topic_classifier.fit(wrd, tpc)
 
     print('fit')
 
-    with open('tpc_class_file.pkl', 'wb') as sub_class_file:
-        pickle.dump(subject_classifier, sub_class_file)
+    with open('./StackExchange_data/topic_classifier.pkl', 'wb') as sub_class_file:
+        pickle.dump(topic_classifier, sub_class_file)
 
     # type_classifier = BinaryRelevance(classifier=SVC(probability=True), require_dense=[False, True])
     # type_classifier.fit(wrd, typ)
@@ -50,22 +50,27 @@ def learn_svm():
 
 
 def evaluate_model():
-    with open('tpc_class_file.pkl', 'rb') as tpc_class_file:
-        topic_classifier = pickle.load(tpc_class_file)
     wrd = pd.read_csv('./StackExchange_data/data_1000word.csv')
     tpc = pd.read_csv('./StackExchange_data/data_tags.csv')
     topics = pd.read_csv('./StackExchange_data/tags.csv')
     words_vector = pd.read_csv('./StackExchange_data/1000words.csv', header=None, names={'term'})
     tpc_cols_list = list(topics['term'])
     wrd_cols_list = list(words_vector['term'])
-    tpc = tpc[tpc_cols_list]
-    wrd = wrd[wrd_cols_list]
+    tpc = tpc[tpc_cols_list].values
+    wrd = wrd[wrd_cols_list].values
     print('read')
 
-    X_train, X_test, y_train, y_test = train_test_split(wrd, tpc, test_size=0.33)
-    predictions = topic_classifier.predict(X_test)
+    kf = KFold(len(wrd), n_splits=10)
+    for train_index, test_index in kf.split(wrd):
+        print(train_index, test_index)
+        x_train, x_test = wrd[train_index], wrd[test_index]
+        y_train, y_test = tpc[train_index], tpc[test_index]
 
-    hamming_loss(y_test, predictions)
+        topic_classifier = BinaryRelevance(classifier=SVC(probability=True), require_dense=[False, False])
+        topic_classifier.fit(x_train, y_train)
+
+        predictions = topic_classifier.predict(x_test)
+        print('hamming loss:', hamming_loss(y_test, predictions))
     # TODO
 
 
@@ -167,7 +172,7 @@ def eval_porsak_questions():
     print('res3: ', TP_5, total, TP_5 / total)
 
 
-learn_svm()
-# evaluate_model()
+# learn_svm()
+evaluate_model()
 # eval_porsak_questions()
 # do_questions()

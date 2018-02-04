@@ -22,7 +22,7 @@ class Progresser:
             el_str = str(int(eltime / 3600)) + ':' + str(int((eltime % 3600) / 60)) + ':' + str(int(eltime % 60))
             re_str = str(int(retime / 3600)) + ':' + str(int((retime % 3600) / 60)) + ':' + str(int(retime % 60))
 
-            so.write('\rtime: ' + el_str + ' + ' + re_str
+            so.write('\r\ttime: ' + el_str + ' + ' + re_str
                      + '\t\tprogress: %' + str(round(100 * (current_num + 1) / self.total, 2)))
 
 
@@ -225,6 +225,7 @@ def build_word_vectors():
         col_index[col] = ind
 
     # build the train data
+    print('Building train data...')
     p = Progresser(data.shape[0])
     for i, qrow in data.iterrows():
         p.show_progress(i)
@@ -234,71 +235,83 @@ def build_word_vectors():
         for word in qrow['lem_body'].split():
             if word in col_index:
                 train_arr[i][col_index[word]] = 1
-    train_all = pd.DataFrame(train_arr, columns=cols_list)
 
-    # rename columns
-    number = 0
-    for col in train_all:
-        if col != 'question_id':
-            train_all = train_all.rename(columns={col: 'wrd' + str(number)})
-            number += 1
-
-    train_all = train_all.rename(columns={'question_id': 'id'})
-
-    train_all.to_csv('./StackExchange_data/data_1000word.csv', index=False, float_format='%.f', columns=cols_list)
+    # write to file
+    print('\nWriting to file...')
+    with open('./StackExchange_data/data_1000word.csv', 'w') as outfile:
+        for ind, col in enumerate(cols_list):
+            outfile.write(col)
+            if ind == len(cols_list) - 1:
+                outfile.write('\n')
+            else:
+                outfile.write(',')
+        p = Progresser(data.shape[0])
+        line_num = 0
+        line_len = len(train_arr[0])
+        for line in train_arr:
+            p.show_progress(line_num)
+            line_num += 1
+            for i in range(0, line_len):
+                outfile.write(str(line[i]))
+                if i == line_len - 1:
+                    outfile.write('\n')
+                else:
+                    outfile.write(',')
 
 
 def build_tag_vectors():
     data = pd.read_csv('./StackExchange_data/all_data.csv')
     topics = pd.read_csv('./StackExchange_data/tags.csv')
 
-    cols_list = list(topics['term']) + ['id']
+    cols_list = list(topics['term']) + ['question_id']
     data = data.set_index('id')
-    train = pd.DataFrame(dtype=object, columns=cols_list)
 
-    p = Progresser(data.shape[0])
+    train_arr = np.zeros((data.shape[0], len(cols_list)), dtype=np.int16)
+    col_index = dict()
+    for ind, col in enumerate(cols_list):
+        col_index[col] = ind
+
     # build the train data
+    print('Building train data...')
+    p = Progresser(data.shape[0])
     for i, qrow in data.iterrows():
         p.show_progress(i)
-        # if i <= 50000:
-        #     continue
-        train.loc[i, 'id'] = i
-        # set occurrence of the topics
+
+        train_arr[i][col_index['question_id']] = i
+        # set occurrence values
         row_tags = eval(qrow['tag'])
         for tp in row_tags:
             try:
-                train.loc[i, tp] = 1
+                train_arr[i][col_index[tp]] = 1
             except Exception as e:
-                print(e)
-        if i % 2000 == 0:
-            train.to_csv('./StackExchange_data/data_tags' + str(int(i / 2000)) + '.csv', index=False)
-            train = pd.DataFrame(dtype=object, columns=cols_list)
-    print('\n--')
+                # print(e)
+                pass
 
-    # concat all data
-    train_all = pd.DataFrame(dtype=object, columns=list(topics['term']))
-    for i in range(0, 26):
-        try:
-            train_temp = pd.read_csv('./StackExchange_data/data_tags' + str(i) + '.csv')
-            train_temp = train_temp[cols_list]
-            train_temp = train_temp.fillna(0)
-            train_all = pd.concat([train_all, train_temp], axis=0)
-            print(i, 'done!')
-        except Exception as e:
-            print(e)
-
-    train = train.fillna(0)
-    train = train[cols_list]
-    train_all = pd.concat([train_all, train], axis=0)
-    print('The last one done!')
-
-    train_all = train_all[cols_list]
-
-    train_all.to_csv('./StackExchange_data/data_tags.csv', index=False, float_format='%.f', columns=cols_list)
+    # write to file
+    print('\nWriting to file...')
+    with open('./StackExchange_data/data_tags.csv', 'w') as outfile:
+        for ind, col in enumerate(cols_list):
+            outfile.write(col)
+            if ind == len(cols_list) - 1:
+                outfile.write('\n')
+            else:
+                outfile.write(',')
+        p = Progresser(data.shape[0])
+        line_num = 0
+        line_len = len(train_arr[0])
+        for line in train_arr:
+            p.show_progress(line_num)
+            line_num += 1
+            for i in range(0, line_len):
+                outfile.write(str(line[i]))
+                if i == line_len - 1:
+                    outfile.write('\n')
+                else:
+                    outfile.write(',')
 
 
 # combine_all()
 # find_frequent_words()
 # find_all_tags()
-build_word_vectors()
-# build_tag_vectors()
+# build_word_vectors()
+build_tag_vectors()
