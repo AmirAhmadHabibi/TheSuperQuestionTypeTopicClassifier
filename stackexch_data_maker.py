@@ -6,6 +6,7 @@ from nltk.corpus import stopwords
 from nltk.corpus import wordnet
 from nltk import pos_tag, word_tokenize
 from nltk.stem import WordNetLemmatizer
+import numpy as np
 
 
 class Progresser:
@@ -21,8 +22,8 @@ class Progresser:
             el_str = str(int(eltime / 3600)) + ':' + str(int((eltime % 3600) / 60)) + ':' + str(int(eltime % 60))
             re_str = str(int(retime / 3600)) + ':' + str(int((retime % 3600) / 60)) + ':' + str(int(retime % 60))
 
-            so.write('\rprocessed %' + str(round(100 * (current_num + 1) / self.total, 2))
-                     + '\ttime: ' + el_str + ' | ' + re_str)
+            so.write('\rtime: ' + el_str + ' + ' + re_str
+                     + '\t\tprogress: %' + str(round(100 * (current_num + 1) / self.total, 2)))
 
 
 def reformat(text):
@@ -186,45 +187,65 @@ def find_all_tags():
 
 
 def build_word_vectors():
-    data = pd.read_csv('./StackExchange_data/all_data.csv')
+    # data = pd.read_csv('./StackExchange_data/all_data.csv')
+    data = pd.read_csv('./StackExchange_data/all_data-lemmatised.csv')
     words_vector = pd.read_csv('./StackExchange_data/1000words.csv', header=None, names={'term'})
-    lemmatiser = WordNetLemmatizer()
 
-    data = data.set_index('id')
+    data = data.set_index(data['id'])
     # create DataFrame
     cols_list = list(words_vector['term']) + ['question_id']
     train = pd.DataFrame(dtype=object, columns=cols_list)
 
-    cleaner = re.compile('^\s*-*|-\s*$')
-    p = Progresser(data.shape[0])
+    # # lemmatise questions
+    # lemmatiser = WordNetLemmatizer()
+    # data['lem_body'] = ''
+    # cleaner = re.compile('^\s*-*|-\s*$')
+    # p = Progresser(data.shape[0])
+    # for i, qrow in data.iterrows():
+    #     p.show_progress(i)
+    #
+    #     question = ''
+    #     tokens_pos = pos_tag(word_tokenize(qrow['body']))
+    #     for word_pos in tokens_pos:
+    #         word = word_pos[0].lower()
+    #         word = re.sub(cleaner, '', word)
+    #         if len(word) > 2:
+    #             word = lemmatiser.lemmatize(word=word, pos=get_wordnet_pos(word_pos[1]))
+    #         question += word + ' '
+    #     data.loc[i, 'lem_body'] = question
+    #     if i % 2000 == 0:
+    #         data.to_csv('./StackExchange_data/all_data-lemmatised' + str(i) + '.csv', index=False)
+    #
+    # data.to_csv('./StackExchange_data/all_data-lemmatised.csv', index=False)
+    # print('data lemmatised')
+
+    train_arr = np.zeros((data.shape[0], len(cols_list)), dtype=np.int16)
+    col_index = dict()
+    for ind, col in enumerate(cols_list):
+        col_index[col] = ind
+
     # build the train data
+    p = Progresser(data.shape[0])
     for i, qrow in data.iterrows():
         p.show_progress(i)
 
-        train.loc[i, 'question_id'] = i
-
+        train_arr[i][col_index['question_id']] = i
         # set occurrence values
-        tokens_pos = pos_tag(word_tokenize(qrow['body']))
-        for word_pos in tokens_pos:
-            word = word_pos[0].lower()
-            word = re.sub(cleaner, '', word)
-            word = lemmatiser.lemmatize(word=word, pos=get_wordnet_pos(word_pos[1]))
-            if word in train:
-                train.loc[i, word] = 1
-
-        # making backups
-        if i % 5000 == 0:
-            train.to_csv('./StackExchange_data/data_1000word' + str(i) + '.csv', index=False)
-
-    train = train.fillna(0)
+        for word in qrow['lem_body'].split():
+            if word in col_index:
+                train_arr[i][col_index[word]] = 1
+    train_all = pd.DataFrame(train_arr, columns=cols_list)
 
     # rename columns
     number = 0
-    for col in train:
-        train = train.rename(columns={col: 'wrd' + str(number)})
-        number += 1
+    for col in train_all:
+        if col != 'question_id':
+            train_all = train_all.rename(columns={col: 'wrd' + str(number)})
+            number += 1
 
-    train.to_csv('./StackExchange_data/data_1000word.csv', index=False, float_format='%.f')
+    train_all = train_all.rename(columns={'question_id': 'id'})
+
+    train_all.to_csv('./StackExchange_data/data_1000word.csv', index=False, float_format='%.f', columns=cols_list)
 
 
 def build_tag_vectors():

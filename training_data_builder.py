@@ -180,21 +180,21 @@ def concat_1000vec_type_cat():
 
 
 def concat_word2vec2_type_cat():
-    w2v = pd.read_csv('Word2vecData2.txt', header=None)
-    subj = pd.read_csv('subject_vector_Q.csv')
-    type = pd.read_csv('type_vector_Q.csv')
+    w2v = pd.read_csv('./Primary_data/Word2vecData2.txt', header=None)
+    tpc = pd.read_csv('./Primary_data/topic_vector_Q.csv')
+    type = pd.read_csv('./Primary_data/type_vector_Q.csv')
 
     # result = pd.concat([subj, w2v], axis=1)
     # result.to_csv('9_subj;w2v_2.arff', index=False)
 
-    result = pd.concat([type, w2v], axis=1)
-    result.to_csv('10_type;w2v_2.arff', index=False)
+    result = pd.concat([tpc, type, w2v], axis=1)
+    result.to_csv('12_tpc,typ;w2v_2.arff', index=False)
 
 
 def create_arff_header():
     header = '@relation \'CQA\'\n\n'
     for i in range(0, 24):
-        header += '@attribute sub' + str(i) + ' {0,1}\n'
+        header += '@attribute tpc' + str(i) + ' {0,1}\n'
     for i in range(0, 12):
         header += '@attribute typ' + str(i) + ' {0,1}\n'
     for i in range(0, 1000):
@@ -218,8 +218,8 @@ def save_topic_list():
 
 # create_1000word_vector()
 # create_type_vector()
-create_subject_vector()
+# create_subject_vector()
 # concat_1000vec_type_cat()
-# concat_word2vec2_type_cat()
+concat_word2vec2_type_cat()
 
 # save_topic_list()
