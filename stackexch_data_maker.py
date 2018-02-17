@@ -1,29 +1,11 @@
 import pandas as pd
 import re
-import time
-from sys import stdout as so
 from nltk.corpus import stopwords
 from nltk.corpus import wordnet
 from nltk import pos_tag, word_tokenize
 from nltk.stem import WordNetLemmatizer
 import numpy as np
-
-
-class Progresser:
-    def __init__(self, total_num):
-        self.total = total_num
-        self.start_time = time.time()
-
-    def show_progress(self, current_num):
-        if current_num % 10 == 0:
-            eltime = time.time() - self.start_time
-            retime = (self.total - current_num - 1) * eltime / (current_num + 1)
-
-            el_str = str(int(eltime / 3600)) + ':' + str(int((eltime % 3600) / 60)) + ':' + str(int(eltime % 60))
-            re_str = str(int(retime / 3600)) + ':' + str(int((retime % 3600) / 60)) + ':' + str(int(retime % 60))
-
-            so.write('\r\ttime: ' + el_str + ' + ' + re_str
-                     + '\t\tprogress: %' + str(round(100 * (current_num + 1) / self.total, 2)))
+from utilitarianism import Progresser
 
 
 def reformat(text):
