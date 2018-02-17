@@ -35,8 +35,8 @@ def concat_word2vec_subjs():
 
 
 def concat_word2vec_types():
-    questions = pd.read_csv('result_filtered.csv', delimiter=';')
-    w2v = pd.read_csv('questions-word2vec.txt', header=None)
+    questions = pd.read_csv('./Primary_data/result_filtered.csv', delimiter=';')
+    w2v = pd.read_csv('./Primary_data/questions-word2vec.txt', header=None)
     types = pd.read_csv('./1_combine_tags/types-result.csv', delimiter=';')
 
     # creating dataframe
@@ -99,7 +99,7 @@ def create_1000word_vector():
 
 
 def create_type_vector():
-    questions = pd.read_csv('result_filtered.csv', delimiter=';')
+    questions = pd.read_csv('./Primary_data/result_filtered.csv', delimiter=';')
     types = pd.read_csv('./1_combine_tags/types-result.csv', delimiter=';')
 
     # creating dataframe
@@ -120,7 +120,7 @@ def create_type_vector():
     for col in train:
         train[col] = train.apply(lambda row: int(row[col]), axis='columns')
 
-    train.to_csv('type_vector_Q.csv', index=False)
+    train.to_csv('./Primary_data/type_vector_Q.csv', index=False)
 
 
 def create_subject_vector():
@@ -193,11 +193,11 @@ def concat_word2vec2_type_cat():
 
 def create_arff_header():
     header = '@relation \'CQA\'\n\n'
-    for i in range(0, 24):
+    for i in range(0, 26):
         header += '@attribute tpc' + str(i) + ' {0,1}\n'
     for i in range(0, 12):
         header += '@attribute typ' + str(i) + ' {0,1}\n'
-    for i in range(0, 1000):
+    for i in range(0, 100):
         header += '@attribute wrd' + str(i) + ' numeric\n'
     header += '\n@data\n'
     print (header)
@@ -212,7 +212,7 @@ def save_topic_list():
     df.to_csv('./Porsak_data/topic_list.csv', columns={'topic', 'id'}, index=False)
 
 
-# create_arff_header()
+create_arff_header()
 # concat_word2vec_subjs()
 # concat_word2vec_types()
 
@@ -220,6 +220,6 @@ def save_topic_list():
 # create_type_vector()
 # create_subject_vector()
 # concat_1000vec_type_cat()
-concat_word2vec2_type_cat()
+# concat_word2vec2_type_cat()
 
 # save_topic_list()

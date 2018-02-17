@@ -310,8 +310,30 @@ def build_tag_vectors():
                     outfile.write(',')
 
 
+def combine_word_tag():
+    words = pd.read_csv('./StackExchange_data/data_1000word.csv')
+    words_headers = pd.read_csv('./StackExchange_data/1000words.csv', header=None, names={'term'})
+    words = words[list(words_headers['term'])]
+
+    tags = pd.read_csv('./StackExchange_data/data_tags.csv')
+    tags_headers = pd.read_csv('./StackExchange_data/tags.csv')
+    tags = tags[list(tags_headers['term'])]
+
+    header = '@relation \'CQA\'\n\n'
+    for i in range(0, 1000):
+        header += '@attribute wrd' + str(i) + ' {0,1}\n'
+    for i in range(0, 3318):
+        header += '@attribute tpc' + str(i) + ' {0,1}\n'
+    header += '\n@data\n'
+    print(header)
+
+    result = pd.concat([words, tags], axis=1)
+    result.to_csv('./StackExchange_data/Stackexchange.arff', index=False)
+
+
 # combine_all()
 # find_frequent_words()
 # find_all_tags()
 # build_word_vectors()
-build_tag_vectors()
+# build_tag_vectors()
+combine_word_tag()
