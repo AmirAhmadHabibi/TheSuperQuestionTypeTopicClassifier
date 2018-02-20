@@ -6,8 +6,7 @@ from nltk.corpus import stopwords
 from nltk.corpus import wordnet
 from nltk import pos_tag, word_tokenize, sent_tokenize
 from nltk.stem import WordNetLemmatizer
-import numpy as np
-from utilitarianism import Progresser
+from utilitarianism import Progresser, QuickDataFrame
 
 
 def process_html_files():
@@ -86,8 +85,11 @@ def lemmatise_all():
             if os.path.isfile('./EurLex_data/lem_txt/' + str(row['DocID']) + '-lem.txt'):
                 continue
 
-            with open('./EurLex_data/eurlex_txt/' + str(row['DocID']) + '.txt', 'r', encoding="utf8") as infile:
-                raw_text = infile.read()
+            try:
+                with open('./EurLex_data/eurlex_txt/' + str(row['DocID']) + '.txt', 'r', encoding="utf8") as infile:
+                    raw_text = infile.read()
+            except:
+                continue
 
             lemmatised_doc = ''
 
@@ -117,5 +119,134 @@ def lemmatise_all():
             print(e)
 
 
-process_html_files()
-lemmatise_all()
+def find_frequent_words():
+    id_mappings = QuickDataFrame.read_csv('./EurLex_data/eurlex_ID_mappings.csv', sep='\t')
+    words = dict()
+
+    prog = Progresser(len(id_mappings))
+    for i in range(len(id_mappings)):
+        prog.count()
+        try:
+            # read the file
+            try:
+                with open('./EurLex_data/lem_txt/' + str(id_mappings['DocID'][i]) + '-lem.txt', 'r',
+                          encoding="utf8") as infile:
+                    doc_text = infile.read()
+            except IOError as e:
+                # print(e)
+                continue
+            # count the words
+            for word in word_tokenize(doc_text):
+                if word in words:
+                    words[word] += 1
+                else:
+                    words[word] = 1
+        except Exception as e:
+            print(e)
+
+    # remove bad words
+    cleaner = re.compile('^(19\d\d)$|^(2\d\d\d)$|^((?!\d)\w)*$')
+    filtered_words = dict()
+    for word, freq in words.items():
+        if cleaner.match(word):
+            filtered_words[word] = freq
+
+    sorted_words = sorted(filtered_words, key=lambda x: filtered_words[x], reverse=True)
+
+    with open('./EurLex_data/words_frequency.csv', 'w', encoding="utf8") as outfile:
+        for word in sorted_words:
+            try:
+                outfile.write(str(word) + ',' + str(words[word]) + '\n')
+            except Exception as e:
+                print(word, e)
+                pass
+
+    with open('./EurLex_data/1000words.csv', 'w', encoding="utf8") as outfile:
+        for word in sorted_words[:1000]:
+            outfile.write(str(word) + '\n')
+
+
+def find_all_tags():
+    subject_data = QuickDataFrame.read_csv('./EurLex_data/eurlex_id2class/id2class_eurlex_subject_matter.qrels',
+                                           header=False, columns=['sub', 'doc_id', 'col2'], sep=' ')
+    subjects = dict()
+    for i in range(len(subject_data)):
+        sub = subject_data['sub'][i]
+        if sub not in subjects:
+            subjects[sub] = 1
+        else:
+            subjects[sub] += 1
+
+    sorted_tags = sorted(subjects, key=lambda x: subjects[x], reverse=True)
+    with open('./EurLex_data/tags.csv', 'w') as outfile:
+        outfile.write('term,freq\n')
+        for tag in sorted_tags:
+            outfile.write(tag + ',' + str(subjects[tag]) + '\n')
+
+
+def build_all_vectors():
+    id_mappings = QuickDataFrame.read_csv('./EurLex_data/eurlex_ID_mappings.csv', sep='\t')
+    subject_data = QuickDataFrame.read_csv('./EurLex_data/eurlex_id2class/id2class_eurlex_subject_matter.qrels',
+                                           header=False, columns=['sub', 'doc_id', 'col2'], sep=' ')
+    words_vector = QuickDataFrame.read_csv('./EurLex_data/1000words.csv', header=False, columns=['term'])
+    topics = QuickDataFrame.read_csv('./EurLex_data/tags.csv')
+
+    # create DataFrame
+    cols_list = ['doc_id'] + list(words_vector['term']) + list(topics['term'])
+    train = QuickDataFrame(columns=cols_list)
+
+    # filling word columns
+    prog = Progresser(len(id_mappings))
+    for i in range(len(id_mappings)):
+        prog.count()
+        try:
+            # read the file
+            try:
+                with open('./EurLex_data/lem_txt/' + str(id_mappings['DocID'][i]) + '-lem.txt', 'r',
+                          encoding="utf8") as infile:
+                    doc_text = infile.read()
+            except IOError:
+                continue
+
+            # add a new row
+            train.append(value=0)
+
+            # complete the data in that row
+            train['doc_id'][len(train) - 1] = id_mappings['DocID'][i]
+            for word in word_tokenize(doc_text):
+                if word in train.data:
+                    train[word][len(train) - 1] = 1
+        except Exception as e:
+            print(e)
+
+    train.set_index(train['doc_id'], unique=True)
+
+    # filling topic columns
+    for i in range(len(subject_data)):
+        sub = subject_data['sub'][i]
+        doc_id = subject_data['doc_id'][i]
+        train[sub, doc_id] = 1
+
+    # rename columns
+    rename_dict = dict()
+    index = 0
+    for wrd in list(words_vector['term']):
+        rename_dict[wrd] = 'wrd' + str(index)
+        index += 1
+    index = 0
+    for tpc in list(topics['term']):
+        rename_dict[tpc] = 'tpc' + str(index)
+        index += 1
+
+    train.rename(columns=rename_dict)
+
+    # write to file
+    print('\nWriting to file...')
+    train.to_csv('./EurLex_data/eurlex_combined_vectors.csv')
+
+
+# process_html_files()
+# lemmatise_all()
+# find_frequent_words()
+# find_all_tags()
+build_all_vectors()
