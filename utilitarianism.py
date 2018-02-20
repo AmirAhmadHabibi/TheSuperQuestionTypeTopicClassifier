@@ -84,13 +84,26 @@ class QuickDataFrame:
             self.length += 1
             self.index = None
 
-    def add_column(self, name):
+    def add_column(self, name, value=None):
         """Adds a column and fills it with None values"""
         name = str(name)
         if name in self.data:
             name += 'I'
         self.cols.append(name)
-        self.data[name] = [None for _ in range(self.length)]
+        self.data[name] = [copy(value) for _ in range(self.length)]
+
+    def delete_column(self, name):
+        if name in self.data:
+            del self.data[name]
+            self.cols.remove(name)
+
+    def rename(self, columns):
+        """renames each key in the input dictionary to its value"""
+        for old, new in columns.items():
+            if old in self.cols:
+                self.data[new] = self.data.pop(old)
+                self.cols[self.cols.index(old)] = new
+        return self
 
     def rows_equal_to(self, column, value):
         """get a QDF containing the rows in which the given column have the given value"""
@@ -120,14 +133,6 @@ class QuickDataFrame:
         for col in self.cols:
             row.append(self.data[col][i])
         return row
-
-    def rename(self, columns):
-        """renames each key in the input dictionary to its value"""
-        for old, new in columns.items():
-            if old in self.cols:
-                self.data[new] = self.data.pop(old)
-                self.cols[self.cols.index(old)] = new
-        return self
 
     def delete_row(self, i):
         """ deletes the ith row
@@ -175,14 +180,14 @@ class QuickDataFrame:
                 key = str(index_list[i])
                 if key in self.index:
                     raise Exception('index values must be unique if unique=True.')
-                if key in self.data:
-                    raise Exception('index values must not be in column names.')
+                # if key in self.data:
+                #     raise Exception('index values must not be in column names.')
                 self.index[key] = i
         else:
             for i in range(self.length):
                 key = str(index_list[i])
-                if key in self.data:
-                    raise Exception('index values must not be in column names.')
+                # if key in self.data:
+                #     raise Exception('index values must not be in column names.')
                 if key not in self.index:
                     self.index[key] = []
                 self.index[key].append(i)
@@ -314,12 +319,16 @@ class QuickDataFrame:
             first_line = True
             for line_tokens in csv.reader(infile, delimiter=sep):
                 if first_line:
-                    if columns:
-                        qdf = QuickDataFrame(columns)
-                    elif header:
-                        qdf = QuickDataFrame(line_tokens)
+                    if header:
+                        if columns:
+                            qdf = QuickDataFrame(columns)
+                        else:
+                            qdf = QuickDataFrame(line_tokens)
                     else:
-                        qdf = QuickDataFrame(['col' + str(i) for i in range(len(line_tokens))])
+                        if columns:
+                            qdf = QuickDataFrame(columns)
+                        else:
+                            qdf = QuickDataFrame(['col' + str(i) for i in range(len(line_tokens))])
                         qdf.append(line_tokens)
                     first_line = False
                 else:

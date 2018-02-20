@@ -192,7 +192,7 @@ def build_all_vectors():
     topics = QuickDataFrame.read_csv('./EurLex_data/tags.csv')
 
     # create DataFrame
-    cols_list = ['doc_id'] + list(words_vector['term']) + list(topics['term'])
+    cols_list = ['doc_id'] + list(words_vector['term'])
     train = QuickDataFrame(columns=cols_list)
 
     # filling word columns
@@ -219,7 +219,20 @@ def build_all_vectors():
         except Exception as e:
             print(e)
 
+    # index by doc id
     train.set_index(train['doc_id'], unique=True)
+
+    # rename word columns
+    rename_dict = dict()
+    index = 0
+    for wrd in list(words_vector['term']):
+        rename_dict[wrd] = 'wrd' + str(index)
+        index += 1
+    train.rename(columns=rename_dict)
+
+    # add topic columns
+    for col in list(topics['term']):
+        train.add_column(name=col, value=0)
 
     # filling topic columns
     for i in range(len(subject_data)):
@@ -227,17 +240,12 @@ def build_all_vectors():
         doc_id = subject_data['doc_id'][i]
         train[sub, doc_id] = 1
 
-    # rename columns
+    # rename topic columns
     rename_dict = dict()
-    index = 0
-    for wrd in list(words_vector['term']):
-        rename_dict[wrd] = 'wrd' + str(index)
-        index += 1
     index = 0
     for tpc in list(topics['term']):
         rename_dict[tpc] = 'tpc' + str(index)
         index += 1
-
     train.rename(columns=rename_dict)
 
     # write to file
