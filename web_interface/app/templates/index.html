@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        {% if title %}
+        <title>{{ title }} - Super Question Typer</title>
+        {% else %}
+        <title>Super Question Typer</title>
+        {% endif %}
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+    <body>
+        <div class="column">
+            <div class="card">
+                <input type="text" placeholder="متن پرسش خود را وارد کنید...">
+            </div>
+
+            <div class="card">
+                {% for post in posts %}
+                <div><p>{{ post.author.username }} says: <b>{{ post.body }}</b></p></div>
+                {% endfor %}
+            </div>
+        </div>
+    </body>
+</html>

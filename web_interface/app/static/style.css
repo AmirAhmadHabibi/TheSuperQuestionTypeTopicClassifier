@@ -1,0 +1,40 @@
+body {
+    font-family: iransans;
+    margin: 0;
+    background: #67468c;
+    color: #4D4D4D;
+    direction: rtl;
+    text-align: right;
+}
+
+div.column {
+    width: 600pt;
+    height: 100%;
+    margin: auto;
+    padding-top: 100pt;
+    padding-bottom: 100pt;
+}
+
+div.card {
+    background: #e2e2e2;
+    padding: 20pt 40pt;
+    margin-bottom: 30pt;
+    border-radius: 0.2rem;
+    box-shadow: 0px 12pt 17pt 0px rgba(0, 0, 0, 0.2), 0 5px 9px 0 rgba(0, 0, 0, 0.13);
+}
+
+input {
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: rgb(86, 86, 86);
+    font-family: iransans;
+    width: 100%;
+    border: none;
+    background: rgba(0, 0, 0, 0);
+    outline: none;
+}
+
+::placeholder {
+    color: rgba(60, 60, 60, 0.3);
+    opacity: 1;
+}

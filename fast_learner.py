@@ -12,37 +12,37 @@ import pickle
 
 
 def learn_svm():
-    # wrd = pd.read_csv('1000word_vector_Q.csv')
-    # tpc = pd.read_csv('topic_vector_Q.csv')
-    # typ = pd.read_csv('type_vector_Q.csv')
+    wrd = pd.read_csv('./Primary_data/1000word_vector_Q.csv')
+    tpc = pd.read_csv('./Primary_data/topic_vector_Q.csv')
+    # typ = pd.read_csv('./Primary_data/type_vector_Q.csv')
 
     # print(wrd)
     # print(tpc)
     # for col in tpc:
     #     print(col, np.unique(tpc[col]))
-    # tpc.drop('tpc41', axis=1, inplace=True)
-    # tpc.drop('tpc42', axis=1, inplace=True)
+    tpc.drop('tpc41', axis=1, inplace=True)
+    tpc.drop('tpc42', axis=1, inplace=True)
 
-    wrd = pd.read_csv('./StackExchange_data/data_1000word.csv')
-    tpc = pd.read_csv('./StackExchange_data/data_tags.csv')
-    topics = pd.read_csv('./StackExchange_data/tags.csv')
-    words_vector = pd.read_csv('./StackExchange_data/1000words.csv', header=None, names={'term'})
-    tpc_cols_list = list(topics['term'])
-    wrd_cols_list = list(words_vector['term'])
-    tpc = tpc[tpc_cols_list].values
-    wrd = wrd[wrd_cols_list].values
+    # wrd = pd.read_csv('./StackExchange_data/data_1000word.csv')
+    # tpc = pd.read_csv('./StackExchange_data/data_tags.csv')
+    # topics = pd.read_csv('./StackExchange_data/tags.csv')
+    # words_vector = pd.read_csv('./StackExchange_data/1000words.csv', header=None, names={'term'})
+    # tpc_cols_list = list(topics['term'])
+    # wrd_cols_list = list(words_vector['term'])
+    # tpc = tpc[tpc_cols_list].values
+    # wrd = wrd[wrd_cols_list].values
     print('read')
 
     print(tpc.shape)
     print(wrd.shape)
 
-    topic_classifier = BinaryRelevance(classifier=SVC(probability=True, verbose=True), require_dense=[True, True])
+    topic_classifier = BinaryRelevance(classifier=SVC(probability=True), require_dense=[True, True])
     topic_classifier.fit(wrd, tpc)
-
+    print(accuracy_score(tpc, tpc, normalize=True))
     print('fit')
 
-    with open('./StackExchange_data/topic_classifier.pkl', 'wb') as sub_class_file:
-        pickle.dump(topic_classifier, sub_class_file)
+    # with open('./StackExchange_data/topic_classifier.pkl', 'wb') as sub_class_file:
+    #     pickle.dump(topic_classifier, sub_class_file)
 
     # type_classifier = BinaryRelevance(classifier=SVC(probability=True), require_dense=[False, True])
     # type_classifier.fit(wrd, typ)
@@ -225,7 +225,7 @@ def eval_porsak_questions():
     print('res3: ', TP_5, total, TP_5 / total)
 
 
-# learn_svm()
-evaluate_model()
+learn_svm()
+# evaluate_model()
 # eval_porsak_questions()
 # do_questions()
