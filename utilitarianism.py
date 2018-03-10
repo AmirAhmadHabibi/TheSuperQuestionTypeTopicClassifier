@@ -407,8 +407,8 @@ class Progresser:
         self.num += 1
 
     def show_progress(self, current_num):
-        if current_num % 10 != 0:
-            return
+        # if current_num % 10 != 0:
+        #     return
         eltime = time.time() - self.start_time
         retime = (self.total - current_num - 1) * eltime / (current_num + 1)
 

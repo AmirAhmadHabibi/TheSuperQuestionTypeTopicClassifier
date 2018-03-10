@@ -214,12 +214,12 @@ def save_topic_list():
     df.to_csv('./Porsak_data/topic_list.csv', columns={'topic', 'id'}, index=False)
 
 
-create_arff_header()
+# create_arff_header()
 # concat_word2vec_subjs()
 # concat_word2vec_types()
 
 # create_1000word_vector()
-# create_type_vector()
+create_type_vector()
 # create_subject_vector()
 # concat_1000vec_type_cat()
 # concat_word2vec2_type_cat()

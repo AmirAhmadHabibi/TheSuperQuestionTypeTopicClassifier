@@ -14,12 +14,12 @@ import pickle
 def learn_svm():
     wrd = pd.read_csv('./Primary_data/1000word_vector_Q.csv')
     tpc = pd.read_csv('./Primary_data/topic_vector_Q.csv')
-    # typ = pd.read_csv('./Primary_data/type_vector_Q.csv')
+    typ = pd.read_csv('./Primary_data/type_vector_Q.csv')
 
-    # print(wrd)
-    # print(tpc)
     # for col in tpc:
     #     print(col, np.unique(tpc[col]))
+    # for col in typ:
+    #     print(col, np.unique(typ[col]))
     tpc.drop('tpc41', axis=1, inplace=True)
     tpc.drop('tpc42', axis=1, inplace=True)
 
@@ -33,98 +33,25 @@ def learn_svm():
     # wrd = wrd[wrd_cols_list].values
     print('read')
 
-    print(tpc.shape)
     print(wrd.shape)
+    print(tpc.shape)
+    print(typ.shape)
 
-    topic_classifier = BinaryRelevance(classifier=SVC(probability=True), require_dense=[True, True])
-    topic_classifier.fit(wrd, tpc)
-    print(accuracy_score(tpc, tpc, normalize=True))
-    print('fit')
+    topic_classifier = BinaryRelevance(classifier=SVC(kernel='linear', probability=True), require_dense=[True, True])
+    topic_classifier.fit(wrd.values, tpc.values)
 
     # with open('./StackExchange_data/topic_classifier.pkl', 'wb') as sub_class_file:
     #     pickle.dump(topic_classifier, sub_class_file)
+    with open('./Primary_data/topic_classifier.pkl', 'wb') as outfile:
+        pickle.dump(topic_classifier, outfile)
 
-    # type_classifier = BinaryRelevance(classifier=SVC(probability=True), require_dense=[False, True])
-    # type_classifier.fit(wrd, typ)
-    #
-    # typ_class_file = open('typ_class_file.pkl', 'wb')
-    # pickle.dump(type_classifier, typ_class_file)
-    # typ_class_file.close()
+    type_classifier = BinaryRelevance(classifier=SVC(kernel='linear', probability=True), require_dense=[False, True])
+    type_classifier.fit(wrd.values, typ.values)
+
+    with open('./Primary_data/type_classifier.pkl', 'wb') as outfile:
+        pickle.dump(type_classifier, outfile)
 
     print('Saved the pickles!')
-
-
-def evaluate_model():
-    wrd = pd.read_csv('./StackExchange_data/data_1000word.csv')
-    words_vector = pd.read_csv('./StackExchange_data/1000words.csv', header=None, names={'term'})
-    wrd_cols_list = list(words_vector['term'])
-    wrd = wrd[wrd_cols_list].values
-
-    tpc = pd.read_csv('./StackExchange_data/data_tags.csv')
-    topics = pd.read_csv('./StackExchange_data/tags.csv')
-    tpc_cols_list = list(topics['term'])
-    tpc = tpc[tpc_cols_list].values
-    print('read')
-
-    kf = list(KFold(n_splits=4).split(wrd))
-    with open('./StackExchange_data/topic_classifier-folds.pkl', 'wb') as out_file:
-        pickle.dump(kf, out_file)
-    fold_num = 0
-
-    for train_index, test_index in kf:
-        print(train_index, test_index)
-        x_train, x_test = wrd[train_index], wrd[test_index]
-        y_train, y_test = tpc[train_index], tpc[test_index]
-
-        # topic_classifier = BinaryRelevance(classifier=SVC(probability=True, verbose=True, shrinking=False),
-        #                                    require_dense=[True, True])
-        topic_classifier = BinaryRelevance(classifier=GaussianNB(), require_dense=[True, True])
-        # topic_classifier = BinaryRelevance(classifier=RandomForestClassifier(max_depth=5, random_state=0),
-        #                                    require_dense=[True, True])
-
-        topic_classifier.fit(x_train, y_train)
-
-        with open('./StackExchange_data/topic_classifier-NB' + str(fold_num) + '.pkl', 'wb') as out_file:
-            pickle.dump(topic_classifier, out_file)
-
-        try:
-            predictions = topic_classifier.predict(x_test)
-
-            print('Accuracy (normalised):', accuracy_score(y_test, predictions, normalize=True))
-            print('Accuracy:', accuracy_score(y_test, predictions, normalize=False))
-            print('F1_score (micro averaged):', f1_score(y_test, predictions, average='micro'))
-            print('F1_score (macro averaged by labels):', f1_score(y_test, predictions, average='macro'))
-            print('F1_score (averaged by samples):', f1_score(y_test, predictions, average='samples'))
-            print('Hamming loss:', hamming_loss(y_test, predictions))
-            print('Label Ranking loss:', label_ranking_loss(y_test, predictions.toarray()))
-        except Exception as e:
-            print(e)
-
-        fold_num += 1
-
-    # with open('./StackExchange_data/topic_classifier-folds.pkl', 'rb') as in_file:
-    #     kf = pickle.load(in_file)
-    #
-    # fold_num = 0
-    # for train_index, test_index in kf.split(wrd):
-    #     print(train_index, test_index)
-    #     x_train, x_test = wrd[train_index], wrd[test_index]
-    #     y_train, y_test = tpc[train_index], tpc[test_index]
-    #     with open('./StackExchange_data/topic_classifier' + str(fold_num) + '.pkl', 'rb') as infile:
-
-    #         topic_classifier = pickle.load(infile)
-    #         print('num', fold_num, 'loaded')
-    #     predictions = topic_classifier.predict(x_test)
-    #
-    #     print('Accuracy (normalised):', accuracy_score(y_test, predictions, normalize=True))
-    #     print('Accuracy:', accuracy_score(y_test, predictions, normalize=False))
-    #     print('F1_score (micro averaged):', f1_score(y_test, predictions, average='micro'))
-    #     print('F1_score (macro averaged by labels):', f1_score(y_test, predictions, average='macro'))
-    #     print('F1_score (averaged by samples):', f1_score(y_test, predictions, average='samples'))
-    #     print('Hamming loss:', hamming_loss(y_test, predictions))
-    #     print('Label Ranking loss:', label_ranking_loss(y_test, predictions.toarray()))
-    #     fold_num += 1
-    # TODO
 
 
 def tokenise(question):
