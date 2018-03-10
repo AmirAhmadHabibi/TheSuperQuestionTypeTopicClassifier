@@ -1,24 +1,38 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        {% if title %}
-        <title>{{ title }} - Super Question Typer</title>
-        {% else %}
-        <title>Super Question Typer</title>
-        {% endif %}
-        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
-    </head>
-    <body>
-        <div class="column">
-            <div class="card">
-                <input type="text" placeholder="متن پرسش خود را وارد کنید...">
-            </div>
+<head>
+    <title>Super Question Typer</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="column">
 
-            <div class="card">
-                {% for post in posts %}
-                <div><p>{{ post.author.username }} says: <b>{{ post.body }}</b></p></div>
-                {% endfor %}
-            </div>
-        </div>
-    </body>
+    <div class="card">
+        <form action="submit" id="question_form" method="post">
+            <textarea name="question_text" id="qtextarea" rows='1' onkeydown="new auto_size(this);" onloadstart="new auto_size(this);"
+                      placeholder="متن پرسش خود را وارد کنید...">{% if question!='' %}{{question}}{% endif %}</textarea>
+            <button class='ok' type="submit" value="Submit">؟</button>
+        </form>
+    </div>
+
+    {% if words %}
+    <div class="card">
+        {% for word in words %}
+        <button class='type'>{{ word }}</button>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+
+</div>
+</body>
+<script>
+    function auto_size(textbox) {
+        var el = textbox;
+        setTimeout(function () {
+            // el.style.cssText = 'height:auto; padding:0';
+            el.style.cssText = 'height:' + el.scrollHeight + 'px';
+        }, 0);
+    }
+</script>
 </html>

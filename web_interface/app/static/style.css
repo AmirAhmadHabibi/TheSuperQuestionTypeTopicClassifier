@@ -1,5 +1,5 @@
 body {
-    font-family: iransans;
+    font-family: iransans, serif;
     margin: 0;
     background: #67468c;
     color: #4D4D4D;
@@ -8,7 +8,7 @@ body {
 }
 
 div.column {
-    width: 600pt;
+    width: 500pt;
     height: 100%;
     margin: auto;
     padding-top: 100pt;
@@ -17,24 +17,97 @@ div.column {
 
 div.card {
     background: #e2e2e2;
-    padding: 20pt 40pt;
-    margin-bottom: 30pt;
+    padding: 20pt 40pt 30pt;
+    margin-bottom: 50pt;
     border-radius: 0.2rem;
     box-shadow: 0px 12pt 17pt 0px rgba(0, 0, 0, 0.2), 0 5px 9px 0 rgba(0, 0, 0, 0.13);
 }
 
-input {
+textarea {
     font-size: 1.5rem;
     font-weight: 400;
     color: rgb(86, 86, 86);
-    font-family: iransans;
+    font-family: iransans, serif;
+    height: auto;
     width: 100%;
     border: none;
     background: rgba(0, 0, 0, 0);
     outline: none;
+    box-sizing: border-box;
+    resize: none;
+    overflow: hidden;
+    display: block;
 }
 
-::placeholder {
+textarea::placeholder {
     color: rgba(60, 60, 60, 0.3);
     opacity: 1;
+}
+
+form {
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: rgb(86, 86, 86);
+    font-family: iransans, serif;
+    width: 100%;
+    border: none;
+    background: rgba(0, 0, 0, 0);
+    outline: none;
+    box-sizing: border-box;
+    resize: none;
+    display: block;
+}
+
+button.ok {
+    background-color: #da9c50;
+    color: #6c4e29;
+    font-family: iransans, serif;
+    font-size: 30pt;
+    font-weight: 500;
+    padding-top: 4pt;
+    width: 50pt;
+    height: 50pt;
+    border-radius: 25pt;
+    position: relative;
+    right: 370pt;
+    bottom: -50pt;
+    margin-top: -100pt;
+    border-style: unset;
+    box-shadow: 0px 12pt 17pt 0px rgba(0, 0, 0, 0.2), 0 5px 9px 0 rgba(0, 0, 0, 0.13);
+}
+
+button.ok:hover {
+    background-color: #da933c;
+    box-shadow: 0px 12pt 19pt 2px rgba(0, 0, 0, 0.2), 0 5px 11px 2px rgba(0, 0, 0, 0.13);
+}
+
+button.ok:active {
+    background-color: #cc4e23;
+    color: #EEE;
+}
+
+button.ok:focus {
+    outline: 0;
+}
+
+button.type {
+    background-color: #d1d1d1;
+    color: #352b5d;
+    font-family: iransans, serif;
+    font-size: 14pt;
+    width: auto;
+    margin: 3pt 1pt;
+    padding: 0pt 10pt;
+    height: 30pt;
+    border-radius: 5pt;
+    border-style: unset;
+}
+
+button.type:hover {
+    background-color: #494949;
+    color: #cfcfcf;
+}
+
+button.type:focus {
+    outline: 0;
 }
