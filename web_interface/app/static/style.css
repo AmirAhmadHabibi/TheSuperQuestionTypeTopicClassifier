@@ -92,7 +92,7 @@ button.ok:focus {
 
 button.type {
     background-color: #d1d1d1;
-    color: #352b5d;
+    color: #443776;
     font-family: iransans, serif;
     font-size: 14pt;
     width: auto;
@@ -109,5 +109,28 @@ button.type:hover {
 }
 
 button.type:focus {
+    outline: 0;
+}
+
+button.topic {
+    background-color: #d1d1d1;
+    color: #752e2f;
+    font-family: iransans, serif;
+    font-size: 14pt;
+    width: auto;
+    margin: 3pt 1pt;
+    padding: 0pt 10pt;
+    height: 30pt;
+    border-radius: 5pt;
+    border-style: unset;
+}
+
+
+button.topic:hover {
+    background-color: #494949;
+    color: #cfcfcf;
+}
+
+button.topic:focus {
     outline: 0;
 }

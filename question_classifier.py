@@ -5,13 +5,13 @@ import pickle
 
 class QuestionClassifier:
     def __init__(self):
-        with open('../Primary_data/topic_classifier.pkl', 'rb') as infile:
+        with open('./Primary_data/topic_classifier.pkl', 'rb') as infile:
             self.topic_classifier = pickle.load(infile)
-        with open('../Primary_data/type_classifier.pkl', 'rb') as infile:
+        with open('./Primary_data/type_classifier.pkl', 'rb') as infile:
             self.type_classifier = pickle.load(infile)
-        self.topics = pd.read_csv('../Porsak_data/topic_list.csv')
-        self.types = pd.read_csv('../1_combine_tags/types-result.csv', delimiter=';')
-        self.words_vector = pd.read_csv('../Primary_data/words_vector.csv')
+        self.topics = pd.read_csv('./Porsak_data/topic_list.csv')
+        self.types = pd.read_csv('./1_combine_tags/types-result.csv', delimiter=';')
+        self.words_vector = pd.read_csv('./Primary_data/words_vector.csv')
 
     def classify_it(self, question):
         question_vector = self.__question_word_vector(question)

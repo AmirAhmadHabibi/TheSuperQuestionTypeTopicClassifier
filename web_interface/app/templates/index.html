@@ -9,17 +9,25 @@
 
     <div class="card">
         <form action="submit" id="question_form" method="post">
-            <textarea name="question_text" id="qtextarea" rows='1' onkeydown="new auto_size(this);" onloadstart="new auto_size(this);"
+            <textarea name="question_text" id="qtextarea" rows='1' onkeydown="new auto_size(this);"
+                      onloadstart="new auto_size(this);"
                       placeholder="متن پرسش خود را وارد کنید...">{% if question!='' %}{{question}}{% endif %}</textarea>
             <button class='ok' type="submit" value="Submit">؟</button>
         </form>
     </div>
 
-    {% if words %}
+    {% if topics or types %}
     <div class="card">
-        {% for word in words %}
-        <button class='type'>{{ word }}</button>
-        {% endfor %}
+        <div>
+            {% for tpc in topics %}
+            <button class='topic'>{{ tpc }}</button>
+            {% endfor %}
+        </div>
+        <div>
+            {% for typ in types %}
+            <button class='type'>{{ typ }}</button>
+            {% endfor %}
+        </div>
     </div>
     {% endif %}
 
