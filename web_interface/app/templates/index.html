@@ -10,7 +10,6 @@
     <div class="card">
         <form action="submit" id="question_form" method="post">
             <textarea name="question_text" id="qtextarea" rows='1' onkeydown="new auto_size(this);"
-                      onloadstart="new auto_size(this);"
                       placeholder="متن پرسش خود را وارد کنید...">{% if question!='' %}{{question}}{% endif %}</textarea>
             <button class='ok' type="submit" value="Submit">؟</button>
         </form>
@@ -18,29 +17,89 @@
 
     {% if topics or types %}
     <div class="card">
-        <div>
-            {% for tpc in topics %}
-            <button class='topic'>{{ tpc }}</button>
+        <div class="row">
+            <h3>موضوع BoW </h3>
+            {% for tpc, prb, opc in topics %}
+            <div class="tooltip">
+                <button class='tag' id="{{tpc}}"
+                        onclick="toggle_button(this,'topic')"
+                        value="off"
+                        style="opacity:{{ opc }};">{{ tpc }}
+                </button>
+                <span class="tooltiptext">{{prb}}</span>
+            </div>
             {% endfor %}
         </div>
-        <div>
-            {% for typ in types %}
-            <button class='type'>{{ typ }}</button>
+
+        <div class="row">
+            <h3>موضوع W2V </h3>
+            {% for tpc, prb, opc in topics2 %}
+            <div class="tooltip">
+                <button class='tag' id="{{tpc}}"
+                        onclick="toggle_button(this,'topic')"
+                        value="off"
+                        style="opacity:{{ opc }};">{{ tpc }}
+                </button>
+                <span class="tooltiptext">{{prb}}</span>
+            </div>
             {% endfor %}
         </div>
+
+        <div class="row">
+            <h3>نوع BoW </h3>
+            {% for typ, prb, opc in types %}
+            <div class="tooltip">
+                <button class='tag' id="{{typ}}"
+                        onclick="toggle_button(this,'type')"
+                        value="off"
+                        style="opacity:{{ opc }};">{{ typ }}
+                </button>
+                <span class="tooltiptext">{{prb}}</span>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="row">
+            <h3>نوع W2V </h3>
+            {% for typ, prb, opc in types2 %}
+            <div class="tooltip">
+                <button class='tag' id="{{typ}}"
+                        onclick="toggle_button(this,'type')"
+                        value="off"
+                        style="opacity:{{ opc }};">{{ typ }}
+                </button>
+                <span class="tooltiptext">{{prb}}</span>
+            </div>
+            {% endfor %}
+        </div>
+
+        <button class='add' type="submit" value="Submit">+</button>
     </div>
     {% endif %}
 
 
 </div>
-</body>
-<script>
-    function auto_size(textbox) {
-        var el = textbox;
+<script type="text/javascript">
+    auto_size(document.getElementById('qtextarea'));
+
+    function auto_size(el) {
         setTimeout(function () {
-            // el.style.cssText = 'height:auto; padding:0';
             el.style.cssText = 'height:' + el.scrollHeight + 'px';
         }, 0);
     }
+
+    function toggle_button(btn, cls) {
+        if (btn.value == "off") {
+            btn.classList.replace("tag", "selected");
+            btn.value = btn.style.opacity;
+            btn.style.opacity = '1.0';
+        }
+        else {
+            btn.classList.replace("selected", "tag");
+            btn.style.opacity = btn.value;
+            btn.value = "off";
+        }
+    }
 </script>
+</body>
 </html>

@@ -1,7 +1,10 @@
 # coding=utf-8
-import numpy
+import numpy as np
 import pandas as pd
 import sys
+import pickle
+
+from utilitarianism import Progresser, QuickDataFrame
 
 
 def tokenise(qstn):
@@ -85,7 +88,7 @@ def create_1000word_vector():
     #         if word in train:
     #             train.loc[i + first_rows, word] = 1
 
-    print (train.shape)
+    print(train.shape)
     train = train.fillna(0)
 
     # rename columns
@@ -94,7 +97,7 @@ def create_1000word_vector():
         train[col] = train.apply(lambda row: int(row[col]), axis='columns')
         train = train.rename(columns={col: 'wrd' + str(number)})
         number += 1
-    print (train.shape)
+    print(train.shape)
     train.to_csv('1000word_vector_Q.csv', index=False)
 
 
@@ -152,7 +155,6 @@ def create_subject_vector():
             if str(e) != 'nan':
                 print(e)
 
-
     # build the train data from second list of questions
     # for i, qrow in questions_2.iterrows():
     #     if i % 100 == 0: sys.stdout.write('\r' + 'processed question ' + str(i))
@@ -195,14 +197,14 @@ def create_arff_header():
     header = '@relation \'CQA\'\n\n'
     for i in range(0, 26):
         header += '@attribute tpc' + str(i) + ' {0,1}\n'
-    # for i in range(0, 12):
-    #     header += '@attribute typ' + str(i) + ' {0,1}\n'
-    # for i in range(0, 100):
-    #     header += '@attribute wrd' + str(i) + ' numeric\n'
+    for i in range(0, 12):
+        header += '@attribute typ' + str(i) + ' {0,1}\n'
+    for i in range(0, 100):
+        header += '@attribute wrd' + str(i) + ' numeric\n'
     for i in range(0, 1000):
         header += '@attribute wrd' + str(i) + ' numeric\n'
     header += '\n@data\n'
-    print (header)
+    print(header)
 
 
 def save_topic_list():
@@ -214,14 +216,65 @@ def save_topic_list():
     df.to_csv('./Porsak_data/topic_list.csv', columns={'topic', 'id'}, index=False)
 
 
+def read_w2v_data():
+    w2v = dict()
+    # with open('./word2vec/Mixed/twitt_wiki_ham_blog.fa.text.100.vec', 'r', encoding='utf-8') as infile:
+    with open('./word2vec/IRBlog/blog.fa.text.300.vec', 'r', encoding='utf-8') as infile:
+        first_line = True
+        for line in infile:
+            if first_line:
+                first_line = False
+                continue
+            tokens = line.split()
+            w2v[tokens[0]] = [float(el) for el in tokens[1:]]
+            if len(w2v[tokens[0]]) != 300:  # 100:
+                print('Bad line!')
+
+    # with open('./word2vec/Mixed/w2v_per.pkl', 'wb') as outfile:
+    with open('./word2vec/IRBlog/w2v_per_300.pkl', 'wb') as outfile:
+        pickle.dump(w2v, outfile)
+
+
+def create_w2v_vectors():
+    # with open('./word2vec/IRBlog/w2v_per_300.pkl', 'rb') as infile:
+    with open('./word2vec/Mixed/w2v_per.pkl', 'rb') as infile:
+        w2v = pickle.load(infile)
+    w2v_length = 100  # 300
+    stop_words = set(pd.read_csv('./Primary_data/PersianStopWordList.txt', header=None)[0])
+    questions = pd.read_csv('./Primary_data/result_filtered.csv', delimiter=';')
+
+    train = QuickDataFrame(['w' + str(i) for i in range(0, w2v_length)])
+
+    prog = Progresser(questions.shape[0])
+    # build the train data
+    for i, qrow in questions.iterrows():
+        prog.count()
+        sum_array = np.zeros(w2v_length)
+        number_of_words = 0
+
+        for word in tokenise(qrow['sentence']):
+            if word not in stop_words and word in w2v:
+                number_of_words += 1
+                sum_array += w2v[word]
+        if i != len(train):
+            print('wat?!!')
+        train.append(list(sum_array / number_of_words))
+
+    train.to_csv('./Primary_data/w2v-100_vector_Q.csv')
+    # train.to_csv('./Primary_data/w2v-300_vector_Q.csv')
+
+
 # create_arff_header()
 # concat_word2vec_subjs()
 # concat_word2vec_types()
 
 # create_1000word_vector()
-create_type_vector()
+# create_type_vector()
 # create_subject_vector()
 # concat_1000vec_type_cat()
 # concat_word2vec2_type_cat()
 
 # save_topic_list()
+
+# read_w2v_data()
+# create_w2v_vectors()

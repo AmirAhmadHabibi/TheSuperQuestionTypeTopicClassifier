@@ -22,12 +22,12 @@ def evaluate_model(x, y, learn_path, k=10):
     count = 0
     while True:
         count += 1
-        print(count, 'Finding a proper KF...')
+        # print(count, 'Finding a proper KF...')
         kf = list(KFold(n_splits=k, shuffle=True, random_state=randint(0, 100000)).split(x))
         good_folds = True
         for train_index, test_index in kf:
             for i in range(len(y[0])):
-                if len(np.unique(y[train_index, i])) < 2:
+                if len(np.unique(y[train_index, i])) < 2:  # or len(np.unique(y[test_index, i])) < 2:
                     # print(y[train_index, i],np.unique(y[train_index, i]))
                     print(i)
                     good_folds = False
@@ -36,7 +36,7 @@ def evaluate_model(x, y, learn_path, k=10):
                 break
         if good_folds:
             break
-    print('Found a good KF!')
+    print('Found a good KF in', count, 'try!')
 
     with open(learn_path + 'topic_classifier-folds.pkl', 'wb') as out_file:
         pickle.dump(kf, out_file)
@@ -53,9 +53,9 @@ def evaluate_model(x, y, learn_path, k=10):
         x_train, x_test = x[train_index], x[test_index]
         y_train, y_test = y[train_index], y[test_index]
 
-        cls = SVC(kernel='linear')
+        # cls = SVC(kernel='poly', probability=True, tol=1e-5)
         # cls = GaussianNB()
-        # cls = RandomForestClassifier(max_features='auto', random_state=1)
+        cls = RandomForestClassifier(max_features='auto', random_state=1)
 
         topic_classifier = BinaryRelevance(classifier=cls, require_dense=[True, True])
 
@@ -101,12 +101,12 @@ def eval_porsak_questions():
     for i, qrow in questions.iterrows():
         if i % 10 == 0: sys.stdout.write('\r' + 'processed question ' + str(i))
         try:
-            predictions, _ = q_classifier.classify_it(qrow['content'])
+            predictions, _ = q_classifier.bow_classify(qrow['content'])
 
             total += 1
             if qrow['topic'] == predictions['topic'][0]:
                 TP += 1
-            for p in predictions['topic']:
+            for p in predictions['topic'][:5]:
                 if qrow['topic'] == p:
                     TP_5 += 1
                     break
@@ -115,7 +115,7 @@ def eval_porsak_questions():
             print('--', qrow['content'], qrow)
 
     print('res: ', TP, total, TP / total)
-    print('res3: ', TP_5, total, TP_5 / total)
+    print('res5: ', TP_5, total, TP_5 / total)
 
 
 # wrd = pd.read_csv('./StackExchange_data/data_1000word.csv')
@@ -129,32 +129,30 @@ def eval_porsak_questions():
 # tpc = tpc[tpc_cols_list].values
 
 ###################################################################################
-data = QuickDataFrame.read_csv('./EurLex_data/eurlex_combined_vectors.csv')
-data.delete_column('doc_id')
-x_list = []
-for col in data.cols[:1000]:
-    x_list.append(data[col])
-x_array = np.array(x_list, dtype=int).transpose()
-
+# data = QuickDataFrame.read_csv('./EurLex_data/eurlex_combined_vectors.csv')
+# data.delete_column('doc_id')
+# x_list = []
+# for col in data.cols[:1000]:
+#     x_list.append(data[col])
+# x_array = np.array(x_list, dtype=int).transpose()
+#
+# # for col in data.cols[1000:]:
+# #     print(col, np.unique(data[col]))
+#
+# y_list = []
+# i = -1
 # for col in data.cols[1000:]:
-#     print(col, np.unique(data[col]))
-
-bad_cols = {156, 161, 162, 164, 165, 166, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182,
-            183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200}
-y_list = []
-i = -1
-for col in data.cols[1000:]:
-    i += 1
-    if i < 160:
-        y_list.append(data[col])
-    else:
-        count = [0, 0]
-        for el in data[col]:
-            count[int(el)] += 1
-        print(i, count)
-y_array = np.array(y_list, dtype=int).transpose()
-
-evaluate_model(x_array, y_array, './EurLex_data/models/', k=5)
+#     i += 1
+#     if i < 160:
+#         y_list.append(data[col])
+#     else:
+#         count = [0, 0]
+#         for el in data[col]:
+#             count[int(el)] += 1
+#         print(i, count)
+# y_array = np.array(y_list, dtype=int).transpose()
+#
+# evaluate_model(x_array, y_array, './EurLex_data/models/', k=5)
 
 # cls = GaussianNB()
 # Jaccard (normalised) 0.090209213705
@@ -177,14 +175,85 @@ evaluate_model(x_array, y_array, './EurLex_data/models/', k=5)
 # Label Ranking loss: 0.275148839555
 
 ###################################################################################
-# wrd = pd.read_csv('./Primary_data/1000word_vector_Q.csv')
-# tpc = pd.read_csv('./Primary_data/topic_vector_Q.csv')
-#
-# tpc.drop('tpc41', axis=1, inplace=True)
-# tpc.drop('tpc42', axis=1, inplace=True)
-#
-# evaluate_model(wrd.values, tpc.values, './Primary_data/models/')
+wrd = pd.read_csv('./Primary_data/1000word_vector_Q.csv')
+# wrd = pd.read_csv('./Primary_data/w2v-100_vector_Q.csv')
+typ = pd.read_csv('./Primary_data/type_vector_Q.csv')
+tpc = pd.read_csv('./Primary_data/topic_vector_Q.csv')
 
+tpc.drop('tpc41', axis=1, inplace=True)
+tpc.drop('tpc42', axis=1, inplace=True)
+typ.drop('typ9', axis=1, inplace=True)
+typ.drop('typ10', axis=1, inplace=True)
+
+evaluate_model(wrd.values, typ.values, './Primary_data/models/', k=10)
+# evaluate_model(pd.concat([wrd, tpc], axis=1).values, typ.values, './Primary_data/models/', k=10)
+
+
+# # # w2v100+tpc > typ
+# cls = SVC(kernel='poly', probability=True, tol=1e-5)
+# Jaccard (normalised) 0.502408580816
+# Accuracy (normalised) 0.463733998976
+# Accuracy 129.8
+# F1_score (micro averaged) 0.584980279926
+# F1_score (macro averaged by labels) 0.329533855336
+# F1_score (averaged by samples) 0.437980798771
+# Hamming loss 0.0672378392217
+# Label Ranking loss: 0.438358717815
+
+# # # w2v100 > typ
+# cls = SVC(kernel='poly', probability=True, tol=1e-5)
+# Jaccard (normalised) 0.495660086038
+# Accuracy (normalised) 0.45301431127
+# Accuracy 253.6
+# F1_score (micro averaged) 0.577756793334
+# F1_score (macro averaged by labels) 0.327427258353
+# F1_score (averaged by samples) 0.443642175654
+# Hamming loss 0.0707045744953
+# Label Ranking loss: 0.43237197678
+
+# # # w2v100 > tpc
+# cls = SVC(kernel='poly', probability=True, tol=1e-5)
+# Jaccard (normalised) 0.570614652671
+# Accuracy (normalised) 0.448014592934
+# Accuracy 125.4
+# F1_score (micro averaged) 0.683831596709
+# F1_score (macro averaged by labels) 0.559220635898
+# F1_score (averaged by samples) 0.611545058884
+# Hamming loss 0.0312766150367
+# Label Ranking loss: 0.375597457338
+
+# cls = SVC(kernel='poly')
+# Jaccard (normalised) 0.565494111623
+# Accuracy (normalised) 0.442652329749
+# Accuracy 123.9
+# F1_score (micro averaged) 0.682355932347
+# F1_score (macro averaged by labels) 0.555164508284
+# F1_score (averaged by samples) 0.606294290835
+# Hamming loss 0.0312167712067
+# Label Ranking loss: 0.383444962055
+
+# cls = SVC(kernel='linear')
+# Jaccard (normalised) 0.554875277351
+# Accuracy (normalised) 0.409434203789
+# Accuracy 114.6
+# F1_score (micro averaged) 0.653495126747
+# F1_score (macro averaged by labels) 0.524043698375
+# F1_score (averaged by samples) 0.604658419282
+# Hamming loss 0.0371566713603
+# Label Ranking loss: 0.363341210126
+
+# # # w2v300
+# cls = SVC(kernel='linear')
+# Jaccard (normalised) 0.546905582408
+# Accuracy (normalised) 0.363340494092
+# Accuracy 145.285714286
+# F1_score (micro averaged) 0.625354823243
+# F1_score (macro averaged by labels) 0.555707019553
+# F1_score (averaged by samples) 0.612444212146
+# Hamming loss 0.0446738870987
+# Label Ranking loss: 0.325811153074
+
+# # # 1000 words:
 # cls = SVC(kernel='linear')
 # Jaccard (normalised) 0.521736601809
 # Accuracy (normalised) 0.390135688684

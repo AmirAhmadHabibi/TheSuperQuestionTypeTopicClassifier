@@ -74,11 +74,13 @@ button.ok {
     margin-top: -100pt;
     border-style: unset;
     box-shadow: 0px 12pt 17pt 0px rgba(0, 0, 0, 0.2), 0 5px 9px 0 rgba(0, 0, 0, 0.13);
+    transition: background-color 0.4s, color 0.4s, box-shadow 0.4s;
 }
 
 button.ok:hover {
     background-color: #da933c;
     box-shadow: 0px 12pt 19pt 2px rgba(0, 0, 0, 0.2), 0 5px 11px 2px rgba(0, 0, 0, 0.13);
+    transition: background-color 0.4s, color 0.4s, box-shadow 0.4s;
 }
 
 button.ok:active {
@@ -90,9 +92,81 @@ button.ok:focus {
     outline: 0;
 }
 
-button.type {
+button.add {
+    background-color: #76b063;
+    color: #2b4024;
+    font-family: iransans, serif;
+    font-size: 30pt;
+    font-weight: 500;
+    padding-top: 4pt;
+    width: 50pt;
+    height: 50pt;
+    border-radius: 25pt;
+    position: relative;
+    right: 370pt;
+    bottom: -50pt;
+    margin-top: -100pt;
+    border-style: unset;
+    box-shadow: 0px 12pt 17pt 0px rgba(0, 0, 0, 0.2), 0 5px 9px 0 rgba(0, 0, 0, 0.13);
+    transition: background-color 0.4s, color 0.4s, box-shadow 0.4s;
+}
+
+button.add:hover {
+    background-color: #699c58;
+    box-shadow: 0px 12pt 19pt 2px rgba(0, 0, 0, 0.2), 0 5px 11px 2px rgba(0, 0, 0, 0.13);
+    transition: background-color 0.4s, color 0.4s, box-shadow 0.4s;
+}
+
+button.add:active {
+    background-color: #5a854b;
+    color: #EEE;
+}
+
+button.add:focus {
+    outline: 0;
+}
+
+button.tag {
     background-color: #d1d1d1;
-    color: #443776;
+    color: #2f2f2f;
+    font-family: iransans, serif;
+    font-size: 14pt;
+    width: auto;
+    margin: 3pt 1pt;
+    padding: 0pt 10pt;
+    height: 30pt;
+    border-radius: 5pt;
+    border-style: unset;
+    transition: background-color 0.4s, color 0.4s, opacity 0.4s;
+}
+
+button.tag:hover {
+    background-color: #494949;
+    color: #cfcfcf;
+    opacity: 1.0 !important;
+    transition: background-color 0.4s, color 0.4s, opacity 0.4s;
+}
+
+button.tag:focus {
+    outline: 0;
+}
+
+.row {
+    margin-bottom: 15pt;
+}
+
+h3 {
+    font-size: 1rem;
+    font-weight: 400;
+    color: rgb(103, 70, 140);
+    font-family: iransans, serif;
+    margin-bottom: 0;
+    margin-right: 5pt;
+}
+
+.selected {
+    background-color: #6fa55d;
+    color: #f4f4f4;
     font-family: iransans, serif;
     font-size: 14pt;
     width: auto;
@@ -103,34 +177,58 @@ button.type {
     border-style: unset;
 }
 
-button.type:hover {
-    background-color: #494949;
-    color: #cfcfcf;
+.selected:hover {
+    background-color: #5f8b50;
+    transition: background-color 0.4s;
 }
 
-button.type:focus {
+.selected:focus {
     outline: 0;
 }
 
-button.topic {
-    background-color: #d1d1d1;
-    color: #752e2f;
-    font-family: iransans, serif;
-    font-size: 14pt;
-    width: auto;
-    margin: 3pt 1pt;
-    padding: 0pt 10pt;
-    height: 30pt;
-    border-radius: 5pt;
-    border-style: unset;
+/* Tooltip container */
+.tooltip {
+    position: relative;
+    display: inline-block;
 }
 
+/* Tooltip text */
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 45px;
+    background-color: #ececec;;
+    color: #5e5e5e;
+    font-size: 10pt;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 6px;
 
-button.topic:hover {
-    background-color: #494949;
-    color: #cfcfcf;
+    /* Position the tooltip text */
+    position: absolute;
+    z-index: 1;
+    top: 115%;
+
+    /* Fade in tooltip */
+    opacity: 0;
+    transition: opacity 0.3s;
+
+    box-shadow: 0px 3pt 7pt 0px rgba(0, 0, 0, 0.31);
 }
 
-button.topic:focus {
-    outline: 0;
+/* Tooltip arrow */
+.tooltip .tooltiptext::after {
+    content: " ";
+    position: absolute;
+    bottom: 100%; /* At the top of the tooltip */
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent #ececec transparent;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
 }

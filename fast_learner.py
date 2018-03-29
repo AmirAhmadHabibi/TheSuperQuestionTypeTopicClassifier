@@ -12,7 +12,8 @@ import pickle
 
 
 def learn_svm():
-    wrd = pd.read_csv('./Primary_data/1000word_vector_Q.csv')
+    wrd = pd.read_csv('./Primary_data/w2v-100_vector_Q.csv')
+    # wrd = pd.read_csv('./Primary_data/1000word_vector_Q.csv')
     tpc = pd.read_csv('./Primary_data/topic_vector_Q.csv')
     typ = pd.read_csv('./Primary_data/type_vector_Q.csv')
 
@@ -37,23 +38,23 @@ def learn_svm():
     print(tpc.shape)
     print(typ.shape)
 
-    topic_classifier = BinaryRelevance(classifier=SVC(kernel='linear', probability=True), require_dense=[True, True])
+    topic_classifier = BinaryRelevance(classifier=SVC(kernel='poly', probability=True, tol=1e-5),
+                                       require_dense=[True, True])
     topic_classifier.fit(wrd.values, tpc.values)
 
     # with open('./StackExchange_data/topic_classifier.pkl', 'wb') as sub_class_file:
     #     pickle.dump(topic_classifier, sub_class_file)
-    with open('./Primary_data/topic_classifier.pkl', 'wb') as outfile:
+    with open('./Primary_data/topic_classifier-w2v.pkl', 'wb') as outfile:
         pickle.dump(topic_classifier, outfile)
 
-    type_classifier = BinaryRelevance(classifier=SVC(kernel='linear', probability=True), require_dense=[False, True])
+    type_classifier = BinaryRelevance(classifier=SVC(kernel='poly', probability=True, tol=1e-5),
+                                      require_dense=[True, True])
     type_classifier.fit(wrd.values, typ.values)
 
-    with open('./Primary_data/type_classifier.pkl', 'wb') as outfile:
+    with open('./Primary_data/type_classifier-w2v.pkl', 'wb') as outfile:
         pickle.dump(type_classifier, outfile)
 
     print('Saved the pickles!')
-
-
 
 
 learn_svm()
