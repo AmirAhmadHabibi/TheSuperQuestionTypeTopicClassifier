@@ -33,7 +33,7 @@ def extract_words():
     q_words_count = []
     # counting the frequency of words in each question and questions containing each word
     for q_id, qstn in questions.iterrows():
-        if q_id % 100 == 0: print q_id
+        if q_id % 100 == 0: print (q_id)
 
         qstn = qstn['sentence']
         word_list = get_word_list(qstn)
@@ -60,7 +60,7 @@ def go():
 
     # calculating TF-IDF
     for index, word in words.iterrows():
-        if index % 1000 == 0: print 'word', index
+        if index % 1000 == 0: print ('word', index)
         idf = log(len(q_words_count) / word['num_q'])
         tf = []
         tf_sum = 0

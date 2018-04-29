@@ -99,7 +99,7 @@ def get_agreement_of_all():
 # get_agreement_of_all()
 ##################################################################################################################
 
-def eval_category(cat):
+def eval_users(cat):
     data16 = pd.read_csv('./1_combine_tags/16-javaheri_e.csv', delimiter=';', index_col=['id'])
     data17 = pd.read_csv('./1_combine_tags/17-sheikholeslami_e.csv', delimiter=';', index_col=['id'])
     data18 = pd.read_csv('./1_combine_tags/18-sayahi_e.csv', delimiter=';', index_col=['id'])
@@ -129,4 +129,4 @@ def eval_category(cat):
     print('3 label 18 : ' + str(data18[~data18[cat + '3'].isnull()].shape[0]))
 
 
-eval_category(cat='type')
+eval_users(cat='type')

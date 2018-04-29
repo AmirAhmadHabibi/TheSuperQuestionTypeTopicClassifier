@@ -53,7 +53,6 @@ def read_files():
     data17.loc[2568:2799, ('subject_notsure', 'type_notsure')] = 0
 
 
-
 def eval_types():
     print('not sure types for 16 : ' + str(data16['type_notsure'].value_counts()[1]))
     print('not sure types for 17 : ' + str(0))
@@ -176,7 +175,7 @@ def eval_questions(result):
                 result_row['t3 score'] = scores[sorted_scores[2]]
         except Exception as e:
             if str(e) != "list index out of range":
-                print (e)
+                print(e)
             pass
         try:
             if scores[sorted_scores[0]] > 10 and result_row['t1 score'] == result_row['t2 score']:
@@ -368,16 +367,14 @@ def remove_low_scores_and_save_subtyps():
                 types = types.append({'tag': type, 'num': 0}, ignore_index=True)
             types.loc[types['tag'] == type, 'num'] = types.loc[types['tag'] == type, 'num'] + 1
 
-    print ('sub', sub)
-    print ('typ', typ)
+    print('sub', sub)
+    print('typ', typ)
     # result.to_csv('result_filtered.csv', sep=';')
 
     types.to_csv("types-result.csv", sep=';', doublequote=True)
     subjs.to_csv("subjs-result.csv", sep=';', doublequote=True)
 
-
-# combine()
+combine()
 # shared_opinion()
 # remove_low_scores_and_save_subtyps()
 # read_files()
-# eval_subjects()

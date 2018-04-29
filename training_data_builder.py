@@ -126,7 +126,7 @@ def create_type_vector():
     train.to_csv('./Primary_data/type_vector_Q.csv', index=False)
 
 
-def create_subject_vector():
+def create_topic_vector():
     questions = pd.read_csv('result_filtered.csv', delimiter=';')
     # questions_2 = pd.read_csv('./Porsak_data/qa_questions-refined.csv', delimiter=';')
     topics = pd.read_csv('./Porsak_data/topic_list.csv')
@@ -181,28 +181,38 @@ def concat_1000vec_type_cat():
     result.to_csv('./Primary_data/arff/13_tpc;wrd.arff', index=False)
 
 
-def concat_word2vec2_type_cat():
-    w2v = pd.read_csv('./Primary_data/Word2vecData2.txt', header=None)
+def concat_all():
+    bow = pd.read_csv('./Primary_data/1000word_vector_Q.csv')
+    w2v = pd.read_csv('./Primary_data/w2v-100_vector_Q.csv')
+    typ = pd.read_csv('./Primary_data/type_vector_Q.csv')
     tpc = pd.read_csv('./Primary_data/topic_vector_Q.csv')
-    type = pd.read_csv('./Primary_data/type_vector_Q.csv')
 
-    # result = pd.concat([subj, w2v], axis=1)
-    # result.to_csv('9_subj;w2v_2.arff', index=False)
+    result = pd.concat([typ, bow], axis=1)
+    result.to_csv('./Primary_data/arff/1_typ;bow.arff', index=False)
 
-    result = pd.concat([tpc, type, w2v], axis=1)
-    result.to_csv('12_tpc,typ;w2v_2.arff', index=False)
+    result = pd.concat([typ, w2v], axis=1)
+    result.to_csv('./Primary_data/arff/2_typ;w2v.arff', index=False)
+
+    result = pd.concat([typ, tpc, bow], axis=1)
+    result.to_csv('./Primary_data/arff/3_typ;tpc,bow.arff', index=False)
+
+    result = pd.concat([tpc, bow], axis=1)
+    result.to_csv('./Primary_data/arff/4_tpc;bow.arff', index=False)
+
+    result = pd.concat([tpc, w2v], axis=1)
+    result.to_csv('./Primary_data/arff/5_tpc;w2v.arff', index=False)
 
 
 def create_arff_header():
     header = '@relation \'CQA\'\n\n'
+    # for i in range(0, 12):
+    #     header += '@attribute typ' + str(i) + ' {0,1}\n'
     for i in range(0, 26):
         header += '@attribute tpc' + str(i) + ' {0,1}\n'
-    for i in range(0, 12):
-        header += '@attribute typ' + str(i) + ' {0,1}\n'
     for i in range(0, 100):
         header += '@attribute wrd' + str(i) + ' numeric\n'
-    for i in range(0, 1000):
-        header += '@attribute wrd' + str(i) + ' numeric\n'
+    # for i in range(0, 1000):
+    #     header += '@attribute wrd' + str(i) + ' {0,1}\n'
     header += '\n@data\n'
     print(header)
 
@@ -264,15 +274,15 @@ def create_w2v_vectors():
     # train.to_csv('./Primary_data/w2v-300_vector_Q.csv')
 
 
-# create_arff_header()
+create_arff_header()
 # concat_word2vec_subjs()
 # concat_word2vec_types()
 
 # create_1000word_vector()
 # create_type_vector()
-# create_subject_vector()
+# create_topic_vector()
 # concat_1000vec_type_cat()
-# concat_word2vec2_type_cat()
+# concat_all()
 
 # save_topic_list()
 

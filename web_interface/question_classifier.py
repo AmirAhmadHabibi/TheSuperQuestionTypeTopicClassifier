@@ -60,7 +60,9 @@ class QuestionClassifier:
             if word not in self.stop_words and word in self.w2v:
                 number_of_words += 1
                 sum_array += self.w2v[word]
-        return list(sum_array / number_of_words)
+        if number_of_words > 0:
+            return list(sum_array / number_of_words)
+        return list(sum_array)
 
     @staticmethod
     def __tokenise(question):
