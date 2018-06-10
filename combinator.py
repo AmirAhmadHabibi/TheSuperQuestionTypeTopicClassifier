@@ -14,9 +14,9 @@ def read_files():
     global data18
 
     # id;title;sentence;subject1;subject2;subject3;subject_notsure;suggested_subject;type1;type2;type3;type_notsure;suggested_type
-    data16 = pd.read_csv('./1_combine_tags/16-javaheri_e.csv', delimiter=';', index_col=['id'])
-    data17 = pd.read_csv('./1_combine_tags/17-sheikholeslami_e.csv', delimiter=';', index_col=['id'])
-    data18 = pd.read_csv('./1_combine_tags/18-sayahi_e.csv', delimiter=';', index_col=['id'])
+    data16 = pd.read_csv('./combining_tags_data/16-javaheri_e.csv', delimiter=';', index_col=['id'])
+    data17 = pd.read_csv('./combining_tags_data/17-sheikholeslami_e.csv', delimiter=';', index_col=['id'])
+    data18 = pd.read_csv('./combining_tags_data/18-sayahi_e.csv', delimiter=';', index_col=['id'])
 
     data16['sentence'] = data16.apply(lambda row: row['sentence'].replace('؛', '.'), axis='columns')
     data17['sentence'] = data17.apply(lambda row: row['sentence'].replace('؛', '.'), axis='columns')

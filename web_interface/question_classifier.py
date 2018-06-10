@@ -20,7 +20,7 @@ class QuestionClassifier:
             self.w2v_length = 100
 
         self.topics = pd.read_csv('../Porsak_data/topic_list.csv')['topic']
-        self.types = pd.read_csv('../1_combine_tags/types-result.csv', delimiter=';')['tag']
+        self.types = pd.read_csv('../combining_tags_data/types-result.csv', delimiter=';')['tag']
         self.bag_of_words = pd.read_csv('../Primary_data/words_vector.csv')
         self.stop_words = set(pd.read_csv('../Primary_data/PersianStopWordList.txt', header=None)[0])
 

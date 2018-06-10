@@ -18,7 +18,7 @@ def tokenise(qstn):
 def concat_word2vec_subjs():
     w2v = pd.read_csv('questions-word2vec.txt', header=None)
     questions = pd.read_csv('result_filtered.csv', delimiter=';')
-    subjs = pd.read_csv('./1_combine_tags/subjs-result.csv', delimiter=';')
+    subjs = pd.read_csv('./combining_tags_data/subjs-result.csv', delimiter=';')
     trn = pd.DataFrame()
     for i, subj in subjs.iterrows():
         trn['sub' + str(subj['id'])] = 0
@@ -40,7 +40,7 @@ def concat_word2vec_subjs():
 def concat_word2vec_types():
     questions = pd.read_csv('./Primary_data/result_filtered.csv', delimiter=';')
     w2v = pd.read_csv('./Primary_data/questions-word2vec.txt', header=None)
-    types = pd.read_csv('./1_combine_tags/types-result.csv', delimiter=';')
+    types = pd.read_csv('./combining_tags_data/types-result.csv', delimiter=';')
 
     # creating dataframe
     train = pd.DataFrame(dtype=object)
@@ -103,7 +103,7 @@ def create_1000word_vector():
 
 def create_type_vector():
     questions = pd.read_csv('./Primary_data/result_filtered.csv', delimiter=';')
-    types = pd.read_csv('./1_combine_tags/types-result.csv', delimiter=';')
+    types = pd.read_csv('./combining_tags_data/types-result.csv', delimiter=';')
 
     # creating dataframe
     train = pd.DataFrame(dtype=object)

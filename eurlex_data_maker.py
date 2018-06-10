@@ -1,6 +1,9 @@
 import os
+import pickle
+
 import pandas as pd
 from bs4 import BeautifulSoup
+import numpy as np
 import re
 from nltk.corpus import stopwords
 from nltk.corpus import wordnet
@@ -184,6 +187,50 @@ def find_all_tags():
             outfile.write(tag + ',' + str(subjects[tag]) + '\n')
 
 
+def build_w2v_vectors():
+    with open('./word2vec/word2vec-En.pkl', 'rb') as infile:
+        w2v = pickle.load(infile)
+
+    w2v_length = 300
+    stop_words = set()
+    for w in stopwords.words('english'):
+        stop_words.add(w)
+
+    id_mappings = QuickDataFrame.read_csv('./EurLex_data/eurlex_ID_mappings.csv', sep='\t')
+
+    # create DataFrame
+    cols_list = ['doc_id'] + ['w' + str(i) for i in range(0, w2v_length)]
+    train = QuickDataFrame(columns=cols_list)
+
+    prog = Progresser(len(id_mappings))
+    for i in range(len(id_mappings)):
+        prog.count()
+        # read the file
+        try:
+            with open('./EurLex_data/lem_txt/' + str(id_mappings['DocID'][i]) + '-lem.txt', 'r',
+                      encoding="utf8") as infile:
+                doc_text = infile.read()
+        except IOError:
+            continue
+        try:
+            sum_array = np.zeros(w2v_length)
+            number_of_words = 0
+
+            for word in word_tokenize(doc_text):
+                if word not in stop_words and word in w2v:
+                    number_of_words += 1
+                    sum_array += w2v[word]
+            if number_of_words > 0:
+                sum_array = sum_array / number_of_words
+
+            train.append([id_mappings['DocID'][i]] + list(sum_array))
+
+        except Exception as e:
+            print(e)
+
+    train.to_csv('./EurLex_data/w2v_vector_Q.csv')
+
+
 def build_all_vectors():
     id_mappings = QuickDataFrame.read_csv('./EurLex_data/eurlex_ID_mappings.csv', sep='\t')
     subject_data = QuickDataFrame.read_csv('./EurLex_data/eurlex_id2class/id2class_eurlex_subject_matter.qrels',
@@ -191,44 +238,47 @@ def build_all_vectors():
     words_vector = QuickDataFrame.read_csv('./EurLex_data/1000words.csv', header=False, columns=['term'])
     topics = QuickDataFrame.read_csv('./EurLex_data/tags.csv')
 
-    # create DataFrame
-    cols_list = ['doc_id'] + list(words_vector['term'])
-    train = QuickDataFrame(columns=cols_list)
-
-    # filling word columns
-    prog = Progresser(len(id_mappings))
-    for i in range(len(id_mappings)):
-        prog.count()
-        try:
-            # read the file
-            try:
-                with open('./EurLex_data/lem_txt/' + str(id_mappings['DocID'][i]) + '-lem.txt', 'r',
-                          encoding="utf8") as infile:
-                    doc_text = infile.read()
-            except IOError:
-                continue
-
-            # add a new row
-            train.append(value=0)
-
-            # complete the data in that row
-            train['doc_id'][len(train) - 1] = id_mappings['DocID'][i]
-            for word in word_tokenize(doc_text):
-                if word in train.data:
-                    train[word][len(train) - 1] = 1
-        except Exception as e:
-            print(e)
-
-    # index by doc id
+    train = QuickDataFrame.read_csv('./EurLex_data/w2v_vector_Q.csv')
     train.set_index(train['doc_id'], unique=True)
 
-    # rename word columns
-    rename_dict = dict()
-    index = 0
-    for wrd in list(words_vector['term']):
-        rename_dict[wrd] = 'wrd' + str(index)
-        index += 1
-    train.rename(columns=rename_dict)
+    # # create DataFrame
+    # cols_list = ['doc_id'] + list(words_vector['term'])
+    # train = QuickDataFrame(columns=cols_list)
+    #
+    # # filling word columns
+    # prog = Progresser(len(id_mappings))
+    # for i in range(len(id_mappings)):
+    #     prog.count()
+    #     try:
+    #         # read the file
+    #         try:
+    #             with open('./EurLex_data/lem_txt/' + str(id_mappings['DocID'][i]) + '-lem.txt', 'r',
+    #                       encoding="utf8") as infile:
+    #                 doc_text = infile.read()
+    #         except IOError:
+    #             continue
+    #
+    #         # add a new row
+    #         train.append(value=0)
+    #
+    #         # complete the data in that row
+    #         train['doc_id'][len(train) - 1] = id_mappings['DocID'][i]
+    #         for word in word_tokenize(doc_text):
+    #             if word in train.data:
+    #                 train[word][len(train) - 1] = 1
+    #     except Exception as e:
+    #         print(e)
+    #
+    # # index by doc id
+    # train.set_index(train['doc_id'], unique=True)
+    #
+    # # rename word columns
+    # rename_dict = dict()
+    # index = 0
+    # for wrd in list(words_vector['term']):
+    #     rename_dict[wrd] = 'wrd' + str(index)
+    #     index += 1
+    # train.rename(columns=rename_dict)
 
     # add topic columns
     for col in list(topics['term']):
@@ -236,9 +286,12 @@ def build_all_vectors():
 
     # filling topic columns
     for i in range(len(subject_data)):
-        sub = subject_data['sub'][i]
-        doc_id = subject_data['doc_id'][i]
-        train[sub, doc_id] = 1
+        try:
+            sub = subject_data['sub'][i]
+            doc_id = subject_data['doc_id'][i]
+            train[sub, doc_id] = 1
+        except Exception as e:
+            print(e)
 
     # rename topic columns
     rename_dict = dict()
@@ -250,11 +303,13 @@ def build_all_vectors():
 
     # write to file
     print('\nWriting to file...')
-    train.to_csv('./EurLex_data/eurlex_combined_vectors.csv')
+    # train.to_csv('./EurLex_data/eurlex_combined_vectors.csv')
+    train.to_csv('./EurLex_data/eurlex_combined_vectors-w2v.csv')
 
 
 # process_html_files()
 # lemmatise_all()
 # find_frequent_words()
 # find_all_tags()
+# build_w2v_vectors()
 build_all_vectors()

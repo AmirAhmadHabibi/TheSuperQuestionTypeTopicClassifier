@@ -53,16 +53,17 @@ def evaluate_model(x, y, learn_path, k=10):
         x_train, x_test = x[train_index], x[test_index]
         y_train, y_test = y[train_index], y[test_index]
 
-        # cls = SVC(kernel='poly', probability=True, tol=1e-5)
+        # cls = SVC(kernel='linear')
+        cls = SVC(kernel='poly', probability=True, tol=1e-5)
         # cls = GaussianNB()
-        cls = RandomForestClassifier(max_features='auto', random_state=1)
+        # cls = RandomForestClassifier(max_features='auto', random_state=1)
 
         topic_classifier = BinaryRelevance(classifier=cls, require_dense=[True, True])
 
         try:
             topic_classifier.fit(x_train, y_train)
         except Exception as e:
-            print('fit error!:', e)
+            print('\nfit error!:', e)
             continue
 
         with open(learn_path + 'topic_classifier-SVC' + str(fold_num) + '.pkl', 'wb') as out_file:
@@ -130,30 +131,34 @@ def eval_porsak_questions():
 
 ###################################################################################
 # data = QuickDataFrame.read_csv('./EurLex_data/eurlex_combined_vectors.csv')
-# data.delete_column('doc_id')
-# x_list = []
-# for col in data.cols[:1000]:
-#     x_list.append(data[col])
-# x_array = np.array(x_list, dtype=int).transpose()
-#
-# # for col in data.cols[1000:]:
-# #     print(col, np.unique(data[col]))
-#
-# y_list = []
-# i = -1
-# for col in data.cols[1000:]:
-#     i += 1
-#     if i < 160:
-#         y_list.append(data[col])
-#     else:
-#         count = [0, 0]
-#         for el in data[col]:
-#             count[int(el)] += 1
-#         print(i, count)
-# y_array = np.array(y_list, dtype=int).transpose()
-#
-# evaluate_model(x_array, y_array, './EurLex_data/models/', k=5)
+# q_vector_length=1000
+data = QuickDataFrame.read_csv('./EurLex_data/eurlex_combined_vectors-w2v.csv')
+q_vector_length = 300
+data.delete_column('doc_id')
+x_list = []
+for col in data.cols[:q_vector_length]:
+    x_list.append(data[col])
+x_array = np.array(x_list, dtype=float).transpose()
 
+# for col in data.cols[1000:]:
+#     print(col, np.unique(data[col]))
+
+y_list = []
+i = -1
+for col in data.cols[q_vector_length:]:
+    i += 1
+    if i < 160:
+        y_list.append(data[col])
+    else:
+        count = [0, 0]
+        for el in data[col]:
+            count[int(el)] += 1
+        print(i, count)
+y_array = np.array(y_list, dtype=int).transpose()
+
+evaluate_model(x_array, y_array, './EurLex_data/models/', k=5)
+
+## BoW ###############################
 # cls = GaussianNB()
 # Jaccard (normalised) 0.090209213705
 # Accuracy (normalised) 0.000103039670273
@@ -164,7 +169,7 @@ def eval_porsak_questions():
 # Hamming loss 0.141384671323
 # Label Ranking loss: 0.29793993981
 
-# cls = SVC(kernel='linear')
+# cls = SVC(kernel='linear' )
 # Jaccard (normalised) 0.610522034486
 # Accuracy (normalised) 0.367433944685
 # Accuracy 1426.6
@@ -174,22 +179,44 @@ def eval_porsak_questions():
 # Hamming loss 0.00834492297433
 # Label Ranking loss: 0.275148839555
 
+## W2V ##############################
+# cls = SVC(kernel='linear')
+# Jaccard (normalised) 0.405679062661
+# Accuracy (normalised) 0.235152250201
+# Accuracy 913.0
+# F1_score (micro averaged) 0.548598195022
+# F1_score (macro averaged by labels) 0.140844211483
+# F1_score (averaged by samples) 0.45700493993
+# Hamming loss 0.00886647721883
+# Label Ranking loss: 0.582609931228
+
+# cls = GaussianNB()
+# Jaccard (normalised) 0.178940562149
+# Accuracy (normalised) 0.0136506334233
+# Accuracy 53.0
+# F1_score (micro averaged) 0.209756754355
+# F1_score (macro averaged by labels) 0.177835398016
+# F1_score (averaged by samples) 0.274044646778
+# Hamming loss 0.0823452730684
+# Label Ranking loss: 0.250578788312
+
 ###################################################################################
-wrd = pd.read_csv('./Primary_data/1000word_vector_Q.csv')
-# wrd = pd.read_csv('./Primary_data/w2v-100_vector_Q.csv')
-typ = pd.read_csv('./Primary_data/type_vector_Q.csv')
-tpc = pd.read_csv('./Primary_data/topic_vector_Q.csv')
+###################################################################################
+# wrd = pd.read_csv('./Primary_data/1000word_vector_Q.csv')
+# # wrd = pd.read_csv('./Primary_data/w2v-100_vector_Q.csv')
+# typ = pd.read_csv('./Primary_data/type_vector_Q.csv')
+# tpc = pd.read_csv('./Primary_data/topic_vector_Q.csv')
+#
+# tpc.drop('tpc41', axis=1, inplace=True)
+# tpc.drop('tpc42', axis=1, inplace=True)
+# typ.drop('typ9', axis=1, inplace=True)
+# typ.drop('typ10', axis=1, inplace=True)
+#
+# evaluate_model(wrd.values, typ.values, './Primary_data/models/', k=10)
+# # evaluate_model(pd.concat([wrd, tpc], axis=1).values, typ.values, './Primary_data/models/', k=10)
 
-tpc.drop('tpc41', axis=1, inplace=True)
-tpc.drop('tpc42', axis=1, inplace=True)
-typ.drop('typ9', axis=1, inplace=True)
-typ.drop('typ10', axis=1, inplace=True)
 
-evaluate_model(wrd.values, typ.values, './Primary_data/models/', k=10)
-# evaluate_model(pd.concat([wrd, tpc], axis=1).values, typ.values, './Primary_data/models/', k=10)
-
-
-# # # w2v100+tpc > typ
+# # # w2v100+tpc > typ #######################################
 # cls = SVC(kernel='poly', probability=True, tol=1e-5)
 # Jaccard (normalised) 0.502408580816
 # Accuracy (normalised) 0.463733998976
@@ -200,7 +227,7 @@ evaluate_model(wrd.values, typ.values, './Primary_data/models/', k=10)
 # Hamming loss 0.0672378392217
 # Label Ranking loss: 0.438358717815
 
-# # # w2v100 > typ
+# # # w2v100 > typ ###########################################
 # cls = SVC(kernel='poly', probability=True, tol=1e-5)
 # Jaccard (normalised) 0.495660086038
 # Accuracy (normalised) 0.45301431127
@@ -211,7 +238,7 @@ evaluate_model(wrd.values, typ.values, './Primary_data/models/', k=10)
 # Hamming loss 0.0707045744953
 # Label Ranking loss: 0.43237197678
 
-# # # w2v100 > tpc
+# # # w2v100 > tpc ##########################################
 # cls = SVC(kernel='poly', probability=True, tol=1e-5)
 # Jaccard (normalised) 0.570614652671
 # Accuracy (normalised) 0.448014592934
@@ -242,7 +269,7 @@ evaluate_model(wrd.values, typ.values, './Primary_data/models/', k=10)
 # Hamming loss 0.0371566713603
 # Label Ranking loss: 0.363341210126
 
-# # # w2v300
+# # # w2v300 ##############################################
 # cls = SVC(kernel='linear')
 # Jaccard (normalised) 0.546905582408
 # Accuracy (normalised) 0.363340494092
@@ -253,7 +280,7 @@ evaluate_model(wrd.values, typ.values, './Primary_data/models/', k=10)
 # Hamming loss 0.0446738870987
 # Label Ranking loss: 0.325811153074
 
-# # # 1000 words:
+# # # 1000 words: ##########################################
 # cls = SVC(kernel='linear')
 # Jaccard (normalised) 0.521736601809
 # Accuracy (normalised) 0.390135688684

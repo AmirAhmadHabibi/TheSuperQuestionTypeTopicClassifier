@@ -78,31 +78,31 @@ def get_agreement(data1, data2):
 
 
 def get_agreement_of_all():
-    data16 = pd.read_csv('./1_combine_tags/16-javaheri_e.csv', delimiter=';', index_col=['id'])
-    data17 = pd.read_csv('./1_combine_tags/17-sheikholeslami_e.csv', delimiter=';', index_col=['id'])
-    data18 = pd.read_csv('./1_combine_tags/18-sayahi_e.csv', delimiter=';', index_col=['id'])
+    data16 = pd.read_csv('./combining_tags_data/16-javaheri_e.csv', delimiter=';', index_col=['id'])
+    data17 = pd.read_csv('./combining_tags_data/17-sheikholeslami_e.csv', delimiter=';', index_col=['id'])
+    data18 = pd.read_csv('./combining_tags_data/18-sayahi_e.csv', delimiter=';', index_col=['id'])
 
     print('           agreement on subjects  agreement on types')
     sub_agg, typ_agg, agreements16_17 = get_agreement(data16, data17)
     print('16 - 17   ', sub_agg, '       ', typ_agg)
-    # agreements16_17.to_csv('./1_combine_tags/agreement_16_17.csv', index=False)
+    # agreements16_17.to_csv('./combining_tags_data/agreement_16_17.csv', index=False)
 
     sub_agg, typ_agg, agreements16_18 = get_agreement(data16, data18)
     print('16 - 18   ', sub_agg, '       ', typ_agg)
-    # agreements16_18.to_csv('./1_combine_tags/agreement_16_18.csv', index=False)
+    # agreements16_18.to_csv('./combining_tags_data/agreement_16_18.csv', index=False)
 
     sub_agg, typ_agg, agreements17_18 = get_agreement(data17, data18)
     print('17 - 18   ', sub_agg, '       ', typ_agg)
-    # agreements17_18.to_csv('./1_combine_tags/agreement_17_18.csv', index=False)
+    # agreements17_18.to_csv('./combining_tags_data/agreement_17_18.csv', index=False)
 
 
 # get_agreement_of_all()
 ##################################################################################################################
 
 def eval_users(cat):
-    data16 = pd.read_csv('./1_combine_tags/16-javaheri_e.csv', delimiter=';', index_col=['id'])
-    data17 = pd.read_csv('./1_combine_tags/17-sheikholeslami_e.csv', delimiter=';', index_col=['id'])
-    data18 = pd.read_csv('./1_combine_tags/18-sayahi_e.csv', delimiter=';', index_col=['id'])
+    data16 = pd.read_csv('./combining_tags_data/16-javaheri_e.csv', delimiter=';', index_col=['id'])
+    data17 = pd.read_csv('./combining_tags_data/17-sheikholeslami_e.csv', delimiter=';', index_col=['id'])
+    data18 = pd.read_csv('./combining_tags_data/18-sayahi_e.csv', delimiter=';', index_col=['id'])
 
     print('not sure ' + cat + 's for 16 : ' + str(data16[cat + '_notsure'].value_counts()[1]))
     print('suggested ' + cat + 's for 16 : ' + str(data16[~data16['suggested_' + cat].isnull()].shape[0]))
