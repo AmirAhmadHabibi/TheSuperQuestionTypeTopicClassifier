@@ -228,8 +228,8 @@ def save_topic_list():
 
 def read_w2v_data():
     w2v = dict()
-    # with open('./word2vec/Mixed/twitt_wiki_ham_blog.fa.text.100.vec', 'r', encoding='utf-8') as infile:
-    with open('./word2vec/IRBlog/blog.fa.text.300.vec', 'r', encoding='utf-8') as infile:
+    # with open('./word2vec/IRBlog/blog.fa.text.300.vec', 'r', encoding='utf-8') as infile:
+    with open('./word2vec/Mixed/twitt_wiki_ham_blog.fa.text.100.vec', 'r', encoding='utf-8') as infile:
         first_line = True
         for line in infile:
             if first_line:
@@ -240,8 +240,8 @@ def read_w2v_data():
             if len(w2v[tokens[0]]) != 300:  # 100:
                 print('Bad line!')
 
-    # with open('./word2vec/Mixed/w2v_per.pkl', 'wb') as outfile:
-    with open('./word2vec/IRBlog/w2v_per_300.pkl', 'wb') as outfile:
+    # with open('./word2vec/IRBlog/w2v_per_300.pkl', 'wb') as outfile:
+    with open('./word2vec/Mixed/w2v_per.pkl', 'wb') as outfile:
         pickle.dump(w2v, outfile)
 
 

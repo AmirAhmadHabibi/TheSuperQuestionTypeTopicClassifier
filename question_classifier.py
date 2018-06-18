@@ -5,24 +5,24 @@ import pickle
 
 class QuestionClassifier:
     def __init__(self):
-        with open('./Primary_data/topic_classifier.pkl', 'rb') as infile:
+        with open('../Primary_data/topic_classifier.pkl', 'rb') as infile:
             self.topic_classifier_bow = pickle.load(infile)
-        with open('./Primary_data/type_classifier.pkl', 'rb') as infile:
+        with open('../Primary_data/type_classifier.pkl', 'rb') as infile:
             self.type_classifier_bow = pickle.load(infile)
 
-        with open('./Primary_data/topic_classifier-w2v.pkl', 'rb') as infile:
+        with open('../Primary_data/topic_classifier-w2v.pkl', 'rb') as infile:
             self.topic_classifier_w2v = pickle.load(infile)
-        with open('./Primary_data/type_classifier-w2v.pkl', 'rb') as infile:
+        with open('../Primary_data/type_classifier-w2v.pkl', 'rb') as infile:
             self.type_classifier_w2v = pickle.load(infile)
 
-        with open('./word2vec/Mixed/w2v_per.pkl', 'rb') as infile:
+        with open('../word2vec/Mixed/w2v_per.pkl', 'rb') as infile:
             self.w2v = pickle.load(infile)
             self.w2v_length = 100
 
-        self.topics = pd.read_csv('./Porsak_data/topic_list.csv')['topic']
-        self.types = pd.read_csv('./combining_tags_data/types-result.csv', delimiter=';')['tag']
-        self.bag_of_words = pd.read_csv('./Primary_data/words_vector.csv')
-        self.stop_words = set(pd.read_csv('./Primary_data/PersianStopWordList.txt', header=None)[0])
+        self.topics = pd.read_csv('../Porsak_data/topic_list.csv')['topic']
+        self.types = pd.read_csv('../combining_tags_data/types-result.csv', delimiter=';')['tag']
+        self.bag_of_words = pd.read_csv('../Primary_data/words_vector.csv')
+        self.stop_words = set(pd.read_csv('../Primary_data/PersianStopWordList.txt', header=None)[0])
 
     def bow_classify(self, question):
         question_vector = np.array(self.__question_bow_vector(question)).reshape(1, -1)
@@ -60,7 +60,9 @@ class QuestionClassifier:
             if word not in self.stop_words and word in self.w2v:
                 number_of_words += 1
                 sum_array += self.w2v[word]
-        return list(sum_array / number_of_words)
+        if number_of_words > 0:
+            return list(sum_array / number_of_words)
+        return list(sum_array)
 
     @staticmethod
     def __tokenise(question):

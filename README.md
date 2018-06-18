@@ -11,4 +11,17 @@ We use bag of words as the input for our learning methods. In <b>word_vector_bui
 ## Learning a model and prediction
 In <b>fast_learner.py</b> we first use SVM to learn a model from the training data and then we use that model for the prediction of type and topic for the neew questions. 
 
+## Web API
+The web_interface directory contains the web app based on Flask and the API would include the file <b>question_classifier.py</b>. It's use would be like what follows:
+```python
+# initialising the class would load the pre-trained files
+classifier = QuestionClassifier()
+
+# then for each question you can use the BoW or W2V model
+topics_df, types_df = classifier.bow_classify(input_question)
+topics_df, types_df = classifier.w2v_classify(input_question)
+
+# these two are pandas DataFrames of lists of all tags along with the likelihood of their assignment to the input question
+```
+
 A more detailed description of the project will be added soon...
