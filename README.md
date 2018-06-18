@@ -14,6 +14,8 @@ In <b>fast_learner.py</b> we first use SVM to learn a model from the training da
 ## Web API
 The web_interface directory contains the web app based on Flask and the API would include the file <b>question_classifier.py</b>. It's use would be like what follows:
 ```python
+from question_classifier import QuestionClassifier
+
 # initialising the class would load the pre-trained files
 classifier = QuestionClassifier()
 
@@ -21,7 +23,11 @@ classifier = QuestionClassifier()
 topics_df, types_df = classifier.bow_classify(input_question)
 topics_df, types_df = classifier.w2v_classify(input_question)
 
-# these two are pandas DataFrames of lists of all tags along with the likelihood of their assignment to the input question
+# these two are pandas DataFrames
+# they are lists of all tags along with the likelihood of their assignment to the input question
+for item in topics_df.values:
+    print('tag:', item[0])
+    print('likelihood:', item[1])
 ```
 
 A more detailed description of the project will be added soon...
