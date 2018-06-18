@@ -9,7 +9,7 @@ For each question, the annotators can select up to 3 category labels, while the 
 ## Training data
 We use bag of words as the input for our learning methods. In <b>word_vector_builder.py</b> we find the most frequent words in the questions of our dataset excluding the stop words. Then in <b>training_data_builder.py</b> we create the feature vector and the vector of types and topics for each question. 
 ## Learning a model and prediction
-In <b>fast_learner.py</b> we first use SVM to learn a model from the training data and then we use that model for the prediction of type and topic for the neew questions. 
+In <b>model_evaluator.py</b> the different vector representations and training algorithms are evaluated and then in <b>fast_learner.py</b> we first use the best algorithms from the previous step to learn models from the training data and dump them as pickle files.
 
 ## Web API
 The web_interface directory contains the web app based on Flask and the API would include the file <b>question_classifier.py</b>. It's use would be like what follows:
