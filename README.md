@@ -12,7 +12,7 @@ We use bag of words as the input for our learning methods. In <b>word_vector_bui
 In <b>model_evaluator.py</b> the different vector representations and training algorithms are evaluated and then in <b>fast_learner.py</b> we use the best algorithms from the previous step to learn models from the training data and dump them as pickle files.
 
 ## Web API
-The web_interface directory contains the web app based on Flask and the API would include the file <b>question_classifier.py</b>. It's use would be like what follows:
+The web_interface directory contains the web app based on Flask and the classifier API would include the file <b>question_classifier.py</b>. It's use would be like what follows:
 ```python
 from question_classifier import QuestionClassifier
 
@@ -20,10 +20,11 @@ from question_classifier import QuestionClassifier
 classifier = QuestionClassifier()
 
 # then for each question you can use the Bag of Words or Word2vec pre-trained model
+# these methods would create the question vector and feed it to the model and then return the resulting list of tags
 topics_df, types_df = classifier.bow_classify(input_question)
 topics_df, types_df = classifier.w2v_classify(input_question)
 
-# these two are pandas DataFrames
+# these two outputs are pandas DataFrames
 # they are lists of all tags along with the likelihood of their assignment to the input question
 for item in topics_df.values:
     print('tag:', item[0])
