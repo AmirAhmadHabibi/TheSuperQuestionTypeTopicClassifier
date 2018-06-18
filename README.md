@@ -5,7 +5,7 @@ The dataset used for our experiments is a set of 2800 Persian questions randomly
 For both question topics and types, the data were annotated by three annotators who are graduate students and native speakers of Persian. 
 For each question, the annotators can select up to 3 category labels, while the order of labels should also be taken into the account; i.e., the first label has a higher priority compared to the second one. If none of the available labels are appropriate, they can suggest a new label for the question. The interface also provides a check box for the uncertainty of the annotators. They should fill it if they are not sure about their selected label(s).
 <br><b>combinator.py</b> contains the code for combining the tags of these annotators and evaluating some of the statistics of their tags. A further analysis of the statistics is done in <b>analyser_pro.py</b>.
-#### This dataset will be available soon.
+#### This dataset is available in Primary_data/result_filtered.csv
 ## Training data
 We use bag of words as the input for our learning methods. In <b>word_vector_builder.py</b> we find the most frequent words in the questions of our dataset excluding the stop words. Then in <b>training_data_builder.py</b> we create the feature vector and the vector of types and topics for each question. 
 ## Learning a model and prediction
