@@ -16,10 +16,10 @@ The web_interface directory contains the web app based on Flask and the API woul
 ```python
 from question_classifier import QuestionClassifier
 
-# initialising the class would load the pre-trained files
+# initialising the class would load the pre-trained models
 classifier = QuestionClassifier()
 
-# then for each question you can use the BoW or W2V model
+# then for each question you can use the Bag of Words or Word2vec pre-trained model
 topics_df, types_df = classifier.bow_classify(input_question)
 topics_df, types_df = classifier.w2v_classify(input_question)
 
