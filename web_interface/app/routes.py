@@ -57,3 +57,4 @@ def submit_tags():
     data_handler.add_question(question, topics, types)
 
     return render_template('index.html', question='', topics=[], types=[], topics2=[], types2=[])
+

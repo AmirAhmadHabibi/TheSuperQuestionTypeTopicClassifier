@@ -62,9 +62,9 @@ def concat_word2vec_types():
 
 
 def create_1000word_vector():
-    questions = pd.read_csv('result_filtered.csv', delimiter=';')
+    questions = pd.read_csv('./Primary_data/result_filtered.csv', delimiter=';')
     # questions_2 = pd.read_csv('./Porsak_data/qa_questions-refined.csv', delimiter=';')
-    words_vector = pd.read_csv('words_vector.csv')
+    words_vector = pd.read_csv('./Primary_data/words_vector.csv')
     # first_rows = 2799
 
     # create dataframe
@@ -99,6 +99,14 @@ def create_1000word_vector():
         number += 1
     print(train.shape)
     train.to_csv('1000word_vector_Q.csv', index=False)
+
+
+def create_clean_questions():
+    questions = pd.read_csv('./Primary_data/result_filtered.csv', delimiter=';')
+    # stop_words = set(pd.read_csv('./Primary_data/PersianStopWordList.txt', header=None)[0])
+    with open('./Primary_data/questions.txt', 'w', encoding='utf-8') as outf:
+        for i, qrow in questions.iterrows():
+            outf.write(' '.join(tokenise(qrow['sentence'])) + '\n')
 
 
 def create_type_vector():
@@ -274,7 +282,53 @@ def create_w2v_vectors():
     # train.to_csv('./Primary_data/w2v-300_vector_Q.csv')
 
 
-create_arff_header()
+def create_sentence_files():
+    stop_words = set(pd.read_csv('./Primary_data/PersianStopWordList.txt', header=None)[0])
+    questions = QuickDataFrame.read_csv('./Primary_data/result_filtered.csv', sep=';')
+    topics = QuickDataFrame.read_csv('./Primary_data/topic_vector_Q.csv')
+
+    files = dict()
+    for tpc in topics.cols:
+        files[tpc + '-p'] = open('./Primary_data/sent_topic/' + tpc + '.p', 'w', encoding='utf-8')
+        files[tpc + '-n'] = open('./Primary_data/sent_topic/' + tpc + '.n', 'w', encoding='utf-8')
+
+    prog = Progresser(len(questions['sentence']))
+    # build the train data
+    for i, qrow in enumerate(questions['sentence']):
+        prog.count()
+        snt = []
+        for word in tokenise(qrow):
+            if word not in stop_words:
+                snt.append(word)
+        snt = ' '.join(snt)
+        for tpc in topics.cols:
+            if topics[tpc][i] == '0':
+                files[tpc + '-n'].write(snt + '\n')
+            elif topics[tpc][i] == '1':
+                files[tpc + '-p'].write(snt + '\n')
+            else:
+                print("wattt")
+
+    for fl in files.values():
+        fl.close()
+
+
+def create_word_to_index():
+    questions = pd.read_csv('./Primary_data/questions.txt', delimiter=';', header=None)[0].values
+    w2i = {}
+    for q in questions:
+        for word in q.split():
+            try:
+                w2i[word] += 1
+            except:
+                w2i[word] = 1
+    w2i_sorted = sorted(w2i.items(), key=lambda tup: tup[1],reverse=True)
+    with open('./Primary_data/word_to_index.csv', 'w', encoding='utf-8') as outf:
+        for i, w in enumerate(w2i_sorted):
+            outf.write(w[0] + ',' + str(i+1) + '\n')
+
+
+# create_arff_header()
 # concat_word2vec_subjs()
 # concat_word2vec_types()
 
@@ -288,3 +342,7 @@ create_arff_header()
 
 # read_w2v_data()
 # create_w2v_vectors()
+
+# create_sentence_files()
+# create_clean_questions()
+create_word_to_index()

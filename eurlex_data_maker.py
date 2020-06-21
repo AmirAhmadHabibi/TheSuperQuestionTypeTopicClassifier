@@ -238,47 +238,47 @@ def build_all_vectors():
     words_vector = QuickDataFrame.read_csv('./EurLex_data/1000words.csv', header=False, columns=['term'])
     topics = QuickDataFrame.read_csv('./EurLex_data/tags.csv')
 
-    train = QuickDataFrame.read_csv('./EurLex_data/w2v_vector_Q.csv')
+    # train = QuickDataFrame.read_csv('./EurLex_data/w2v_vector_Q.csv')
+    # train.set_index(train['doc_id'], unique=True)
+
+    # create DataFrame
+    cols_list = ['doc_id'] + list(words_vector['term'])
+    train = QuickDataFrame(columns=cols_list)
+
+    # filling word columns
+    prog = Progresser(len(id_mappings))
+    for i in range(len(id_mappings)):
+        prog.count()
+        try:
+            # read the file
+            try:
+                with open('./EurLex_data/lem_txt/' + str(id_mappings['DocID'][i]) + '-lem.txt', 'r',
+                          encoding="utf8") as infile:
+                    doc_text = infile.read()
+            except IOError:
+                continue
+
+            # add a new row
+            train.append(value=0)
+
+            # complete the data in that row
+            train['doc_id'][len(train) - 1] = id_mappings['DocID'][i]
+            for word in word_tokenize(doc_text):
+                if word in train.data:
+                    train[word][len(train) - 1] = 1
+        except Exception as e:
+            print(e)
+
+    # index by doc id
     train.set_index(train['doc_id'], unique=True)
 
-    # # create DataFrame
-    # cols_list = ['doc_id'] + list(words_vector['term'])
-    # train = QuickDataFrame(columns=cols_list)
-    #
-    # # filling word columns
-    # prog = Progresser(len(id_mappings))
-    # for i in range(len(id_mappings)):
-    #     prog.count()
-    #     try:
-    #         # read the file
-    #         try:
-    #             with open('./EurLex_data/lem_txt/' + str(id_mappings['DocID'][i]) + '-lem.txt', 'r',
-    #                       encoding="utf8") as infile:
-    #                 doc_text = infile.read()
-    #         except IOError:
-    #             continue
-    #
-    #         # add a new row
-    #         train.append(value=0)
-    #
-    #         # complete the data in that row
-    #         train['doc_id'][len(train) - 1] = id_mappings['DocID'][i]
-    #         for word in word_tokenize(doc_text):
-    #             if word in train.data:
-    #                 train[word][len(train) - 1] = 1
-    #     except Exception as e:
-    #         print(e)
-    #
-    # # index by doc id
-    # train.set_index(train['doc_id'], unique=True)
-    #
-    # # rename word columns
-    # rename_dict = dict()
-    # index = 0
-    # for wrd in list(words_vector['term']):
-    #     rename_dict[wrd] = 'wrd' + str(index)
-    #     index += 1
-    # train.rename(columns=rename_dict)
+    # rename word columns
+    rename_dict = dict()
+    index = 0
+    for wrd in list(words_vector['term']):
+        rename_dict[wrd] = 'wrd' + str(index)
+        index += 1
+    train.rename(columns=rename_dict)
 
     # add topic columns
     for col in list(topics['term']):
